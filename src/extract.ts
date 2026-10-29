@@ -40,7 +40,8 @@ The mail was sent by an internal person (usually the co-founder) and usually for
 
 Rules:
 - One mail is one lead. If the mail is about several client companies, decide "review".
-- Assignees are the people the sender names or Cc's as owners ("Priya to handle", "@Ravi", a Cc'd colleague). Map each to an email from the provided users list only. If a first name matches two users, or a name matches nobody, decide "review". If no owner is named, decide "review".
+- Assignees: if an <assignees> block is given, those salespeople were already taken from the To: line. Put exactly those emails in salesPersonEmails and never decide "review" because of assignees.
+- Without an <assignees> block, assignees are the people the sender names as owners in the text ("Priya to handle", "@Ravi"). Map each to an email from the provided users list only. If a first name matches two users, or a name matches nobody, decide "review". If no owner is named, decide "review".
 - services must be names from the provided services list only, spelled as listed. Leave the list empty when the mail does not clearly name one. Do not guess.
 - email and mobile must appear in the mail. Never invent or complete them. If neither appears, decide "review". Use the client's contact details, never those of ${company} staff.
 - Clients can be in any country. mobile is digits only, without the dial code; put the dial code written with the number (e.g. "+44", "+971") in mobileCountryCode. If no dial code is written, use "+91" only for a 10-digit number starting with 6-9, otherwise null.
@@ -50,12 +51,20 @@ Rules:
 Decide "create" only when the lead is complete and unambiguous. Otherwise decide "review" with a one-line reason.`;
 }
 
-export function buildUserMessage(mail: Mail, reference: Reference): string {
+// Salespeople to assign: To: recipients who are CRM users, minus our own addresses (sender, intake mailbox, lead generator).
+export function recipientAssignees(mail: Mail, reference: Reference, exclude: string[]): string[] {
+  const users = new Set(reference.users.map((u) => u.email.toLowerCase()));
+  const skip = new Set(exclude.map((e) => e.toLowerCase()));
+  return mail.to.filter((a) => users.has(a) && !skip.has(a));
+}
+
+export function buildUserMessage(mail: Mail, reference: Reference, assignees: string[] = []): string {
   const users = reference.users.map((u) => `${u.name} <${u.email}>`).join("\n");
   const services = reference.services.map((s) => `- ${s}`).join("\n") || "(none)";
   return [
     `<users>\n${users}\n</users>`,
     `<services>\n${services}\n</services>`,
+    ...(assignees.length ? [`<assignees>\n${assignees.join("\n")}\n</assignees>`] : []),
     "<mail>",
     `From: ${mail.fromHeader}`,
     `To: ${mail.to.join(", ")}`,
@@ -129,11 +138,16 @@ export function readAnswer({ content, finishReason }: Answer): ReadResult<Extrac
 }
 
 // Throws AiUnavailableError when every model errored; an unusable answer from all of them goes to review.
-export async function extract(mail: Mail, reference: Reference): Promise<ExtractResult> {
+// assignees: salespeople already chosen from To:, which override whatever the AI picked.
+export async function extract(mail: Mail, reference: Reference, assignees: string[] = []): Promise<ExtractResult> {
   const system = systemPrompt(getEnv().COMPANY_NAME);
-  const result = await askJson(system, buildUserMessage(mail, reference), RESPONSE_SCHEMA, readAnswer, {
+  const result = await askJson(system, buildUserMessage(mail, reference, assignees), RESPONSE_SCHEMA, readAnswer, {
     messageId: mail.id,
     mailSubject: mail.subject,
   });
-  return result.ok ? result.value : { ok: false, reason: result.unusable };
+  if (!result.ok) return { ok: false, reason: result.unusable };
+  const value = result.value;
+  if (!assignees.length) return value;
+  if (value.ok) return { ok: true, payload: { ...value.payload, salesPersonEmails: assignees } };
+  return value.draft ? { ...value, draft: { ...value.draft, salesPersonEmails: assignees } } : value;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { modelOrder } from "../src/ai.js";
-import { buildUserMessage, interpret, parseJsonContent, readAnswer, SOURCE, systemPrompt } from "../src/extract.js";
+import { buildUserMessage, interpret, parseJsonContent, readAnswer, recipientAssignees, SOURCE, systemPrompt } from "../src/extract.js";
 import { parseMessage } from "../src/mail.js";
 import { fixture, gmailMessage } from "./helpers.js";
 
@@ -99,5 +99,39 @@ describe("readAnswer", () => {
 describe("systemPrompt", () => {
   it("uses the configured company name", () => {
     expect(systemPrompt("Acme Media")).toContain("never Acme Media");
+  });
+});
+
+describe("recipientAssignees", () => {
+  const reference = {
+    users: [
+      { name: "Priya Shah", email: "priya@excellentpublicity.com" },
+      { name: "Ravi Kumar", email: "ravi@excellentpublicity.com" },
+      { name: "Lead Gen", email: "man@excellentpublicity.com" },
+    ],
+    services: [],
+  };
+  const mailTo = (to: string, cc = "") =>
+    parseMessage(gmailMessage({ body: "Fwd thread", headers: { To: to, ...(cc ? { Cc: cc } : {}) } }));
+
+  it("assigns the To: recipients who are CRM users", () => {
+    const mail = mailTo("Priya <Priya@excellentpublicity.com>, ravi@excellentpublicity.com, client@acme.com");
+    expect(recipientAssignees(mail, reference, [])).toEqual(["priya@excellentpublicity.com", "ravi@excellentpublicity.com"]);
+  });
+
+  it("leaves out the lead generator, intake mailbox and sender", () => {
+    const mail = mailTo("man@excellentpublicity.com, priya@excellentpublicity.com, leads@x.com");
+    expect(recipientAssignees(mail, reference, ["man@excellentpublicity.com", "leads@x.com"])).toEqual(["priya@excellentpublicity.com"]);
+  });
+
+  it("ignores Cc", () => {
+    const mail = mailTo("leads@x.com", "ravi@excellentpublicity.com");
+    expect(recipientAssignees(mail, reference, ["leads@x.com"])).toEqual([]);
+  });
+
+  it("tells the AI who is assigned", () => {
+    const mail = mailTo("priya@excellentpublicity.com");
+    expect(buildUserMessage(mail, reference, ["priya@excellentpublicity.com"])).toContain("<assignees>\npriya@excellentpublicity.com\n</assignees>");
+    expect(buildUserMessage(mail, reference)).not.toContain("<assignees>");
   });
 });

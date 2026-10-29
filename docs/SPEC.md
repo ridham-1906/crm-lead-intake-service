@@ -69,7 +69,8 @@ The CRM notifies Priya through the bell and by email.
 
 | Do | Why |
 |---|---|
-| Name the owner: "Priya to handle", "@Ravi", or Cc them | A lead without an owner is sent to review |
+| Put the salespeople who should own the lead in **To:** | Every To: recipient who is a CRM user is assigned (the sender, the intake mailbox and the lead generator are skipped). Cc never assigns |
+| If nobody suitable is in To:, name the owner in the text: "Priya to handle", "@Ravi" | The AI maps the name to a CRM user; without any owner the mail goes to review |
 | Use a name that matches only one CRM user (use the full name if two share a first name) | Ambiguous names are sent to review |
 | Make sure the client's email or phone number is in the mail | The service never guesses contact details |
 | Send one client per mail | A mail about several companies is sent to review |
@@ -270,7 +271,8 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Startup fails with "GMAIL_REFRESH_TOKEN is for x, but INTAKE_MAILBOX is y" | Token created in the wrong Google account | Run `npm run authorize` again, signed in as `INTAKE_MAILBOX` |
-| Startup fails with "Invalid environment" | Missing or malformed variable | The log lists each one; compare with `example.env` |
+| Startup fails with "Environment is not valid" | Missing or malformed variable | The log lists each one under `missing` and `invalid`; compare with `example.env` |
+| Startup fails at "gmail sign-in as INTAKE_MAILBOX" with `invalid_grant` | Refresh token belongs to a different OAuth client, or was revoked | Run `npm run authorize` again signed in as `INTAKE_MAILBOX` |
 | Every mail is labelled `CRM-Ignored` | Sender not in `ALLOWED_SENDERS`, or internal mail arriving without Gmail authentication results | Check the log reason. If it's "sender failed DMARC/SPF+DKIM" for internal mail, look at the mail's original headers and raise it with the developer |
 | Nothing happens when mail arrives | Gmail filter didn't add `Lead-Intake`, or the Pub/Sub push isn't reaching the service | Check the label is on the mail; check the subscription's delivery errors. Sweeps still catch mail within `SWEEP_INTERVAL_MINUTES` |
 | Push requests get `401` | `PUBSUB_AUDIENCE` or `PUBSUB_SERVICE_ACCOUNT` doesn't match the subscription | Make them identical to the subscription's settings |
@@ -285,11 +287,15 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 
 Logs go to the same Grafana Loki stack as ep-crm, under their own `app` label. Set `LOKI_URL`, `LOKI_USERNAME` and `LOKI_PASSWORD` to the same values ep-crm uses. With `LOKI_URL` empty, logs go to stdout only; a wrong URL or token never stops the service. Logs always go to stdout as well.
 
+Routine start-up and shutdown progress (`starting`, `startup: <step> ok`, `started on port …`, `gmail watch renewed`, `shutting down`) is printed to the console only and never sent to Loki; it contains no configuration values.
+
 Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `level`. Pino's `warn` appears in Loki as `warning`, and `fatal` as `critical`. Everything else is in the JSON line. Filter on the `level` label, never on the parsed field.
 
 | `msg` | Level | When |
 |---|---|---|
-| `ep-lead-intake listening` | info | Startup finished |
+| `startup: crm reference failed; continuing` | warning | CRM not reachable at startup; the service still starts and retries per mail (`hint` says what to fix) |
+| `startup failed: Environment is not valid (…)` | critical | Variables missing or malformed; lists them in `missing` / `invalid`; the service exits |
+| `startup failed at "<step>": …` | critical | A startup step failed; `hint` says how to fix it; the service exits and an alert is attempted |
 | `mail queued` | info | Mail added to the queue |
 | `AI answered` | info | Which model drafted a mail (`groq:…` or `openrouter:…`) |
 | `AI answer unusable; trying next` | warning | A model's reply wasn't valid lead JSON |
@@ -303,7 +309,7 @@ Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `lev
 | `alert sent` / `alert email failed` | info / error | Alert email outcome |
 | `gmail search failed` / `gmail watch failed` | error | Gmail problems |
 | `unhandled rejection` | error | Stray promise rejection |
-| `uncaught exception` / `boot failed` | critical | Crash; the process exits and Railway restarts it |
+| `uncaught exception` | critical | Crash; the process exits and Railway restarts it |
 
 ```logql
 {app="ep-lead-intake", level="error"}                                # everything broken

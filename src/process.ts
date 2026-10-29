@@ -1,6 +1,6 @@
 import { createLead, getReference, type LeadPayload, type Reference } from "./crm.js";
 import { getEnv } from "./env.js";
-import { extract } from "./extract.js";
+import { extract, recipientAssignees } from "./extract.js";
 import * as gmail from "./gmail.js";
 import { log } from "./log.js";
 import { isSenderAuthenticated, searchableText, type Mail } from "./mail.js";
@@ -12,9 +12,10 @@ export type Outcome = "done" | "review" | "ignored" | "skipped";
 
 // AI extraction followed by code validation; shared with scripts/dry-run.ts.
 export async function draftLead(mail: Mail, reference: Reference): Promise<Draft> {
-  const extracted = await extract(mail, reference);
-  if (!extracted.ok) return extracted;
   const env = getEnv();
+  const assignees = recipientAssignees(mail, reference, [mail.from, env.INTAKE_MAILBOX, env.LEAD_GENERATOR_EMAIL]);
+  const extracted = await extract(mail, reference, assignees);
+  if (!extracted.ok) return extracted;
   const internal = [env.INTAKE_MAILBOX, ...env.ALLOWED_SENDERS];
   const checked = validate(extracted.payload, reference, searchableText(mail), internal);
   return checked.ok ? checked : { ok: false, reason: checked.reason, draft: extracted.payload };

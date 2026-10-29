@@ -62,15 +62,37 @@ const schema = z.object({
 
 export type Env = z.infer<typeof schema>;
 
+// Lists every missing or malformed variable; values are never included, since many are secrets.
+export class EnvError extends Error {
+  constructor(
+    readonly missing: string[],
+    readonly invalid: string[],
+  ) {
+    const parts = [
+      ...(missing.length ? [`missing: ${missing.join(", ")}`] : []),
+      ...(invalid.length ? [`invalid: ${invalid.join("; ")}`] : []),
+    ];
+    super(`Environment is not valid (${parts.join(" | ")}). Compare .env with example.env.`);
+    this.name = "EnvError";
+  }
+}
+
 let cached: Env | undefined;
 
-// Parses process.env once; throws a readable error listing every bad variable.
+// Parses process.env once; throws EnvError naming every missing or malformed variable.
 export function getEnv(): Env {
   if (cached) return cached;
   const result = schema.safeParse(process.env);
   if (!result.success) {
-    const issues = result.error.issues.map((i) => `  ${i.path.join(".")}: ${i.message}`).join("\n");
-    throw new Error(`Invalid environment:\n${issues}`);
+    const missing: string[] = [];
+    const invalid: string[] = [];
+    for (const issue of result.error.issues) {
+      const key = String(issue.path[0] ?? "environment");
+      const empty = !process.env[key]?.trim();
+      if (empty) missing.push(issue.code === "custom" ? `${key} (${issue.message})` : key);
+      else invalid.push(`${key} (${issue.message})`);
+    }
+    throw new EnvError(missing, invalid);
   }
   cached = result.data;
   return cached;

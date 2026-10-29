@@ -1,7 +1,8 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { setTimeout as sleep } from "node:timers/promises";
 import { OAuth2Client } from "google-auth-library";
-import { getEnv } from "./env.js";
+import { getReference } from "./crm.js";
+import { EnvError, getEnv } from "./env.js";
 import { alert } from "./alert.js";
 import { assertMailbox, ensureLabels, watch } from "./gmail.js";
 import { errInfo, flushLogs, log } from "./log.js";
@@ -46,29 +47,94 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   send(res, 404, { error: "Not found" });
 }
 
+// A startup step that failed, with the reason and what to do about it.
+class StartupError extends Error {
+  constructor(
+    readonly step: string,
+    readonly cause: unknown,
+  ) {
+    super(`${step}: ${cause instanceof Error ? cause.message : String(cause)}`);
+  }
+}
+
+// Turns common Google, CRM and network errors into a one-line fix.
+function hintFor(err: unknown): string | undefined {
+  const e = err as { message?: string; code?: unknown; status?: unknown };
+  const msg = e.message ?? "";
+  if (msg.includes("invalid_grant")) {
+    return "GMAIL_REFRESH_TOKEN was not issued to this GOOGLE_CLIENT_ID or was revoked; run `npm run authorize` signed in as INTAKE_MAILBOX";
+  }
+  if (msg.includes("invalid_client") || msg.includes("unauthorized_client")) {
+    return "GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are wrong or the OAuth client was deleted";
+  }
+  if (msg.includes("but INTAKE_MAILBOX is")) return "run `npm run authorize` signed in as INTAKE_MAILBOX, or fix INTAKE_MAILBOX";
+  if (e.code === "EADDRINUSE") return "PORT is already in use; stop the other process or change PORT";
+  if (/topic|pubsub|User not authorized to perform this action/i.test(msg)) {
+    return "check GMAIL_PUBSUB_TOPIC exists and gmail-api-push@system.gserviceaccount.com has Pub/Sub Publisher on it";
+  }
+  if (/ENOTFOUND|ECONNREFUSED|fetch failed|ETIMEDOUT/i.test(msg)) return "network or host unreachable; check the URL and connectivity";
+  if (/ 401/.test(msg)) return "the API key was rejected";
+  if (/ 404/.test(msg)) return "endpoint not found; check the base URL";
+  return undefined;
+}
+
+async function step<T>(name: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    const result = await fn();
+    console.log(`startup: ${name} ok`);
+    return result;
+  } catch (err) {
+    throw new StartupError(name, err);
+  }
+}
+
+// Non-fatal startup check: logs a warning with a hint instead of stopping the service.
+async function check(name: string, fn: () => Promise<string>): Promise<void> {
+  try {
+    console.log(`startup: ${name} ok (${await fn()})`);
+  } catch (err) {
+    log.warn({ step: name, err: errInfo(err), hint: hintFor(err) }, `startup: ${name} failed; continuing`);
+  }
+}
+
+function listen(port: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const server = createServer((req, res) => {
+      handle(req, res).catch((err: unknown) => {
+        log.error({ err: errInfo(err) }, "request failed");
+        if (!res.headersSent) send(res, 500, { error: "Internal error" });
+      });
+    });
+    server.once("error", reject);
+    server.listen(port, () => resolve());
+  });
+}
+
 async function renewWatch(trigger: string): Promise<void> {
   try {
     const expiration = await watch();
-    log.info({ trigger, expiration }, "gmail watch renewed");
+    console.log(`gmail watch renewed (${trigger})${expiration ? `, expires ${new Date(Number(expiration)).toISOString()}` : ""}`);
   } catch (err) {
-    log.error({ err: errInfo(err), trigger }, "gmail watch failed");
+    log.error({ err: errInfo(err), trigger, hint: hintFor(err) }, "gmail watch failed; new mail only arrives via sweeps");
     await alert({ stage: "Watch", summary: "renewing the Gmail watch failed; new mail only arrives via sweeps", error: err });
   }
 }
 
 async function main(): Promise<void> {
-  const env = getEnv();
-  await assertMailbox();
-  await ensureLabels();
+  console.log(`ep-lead-intake starting (node ${process.version})`);
+  const env = await step("environment", async () => getEnv());
+  await step("gmail sign-in as INTAKE_MAILBOX", assertMailbox);
+  await step("gmail labels", ensureLabels);
+  await step(`http server on port ${env.PORT}`, () => listen(env.PORT));
 
-  createServer((req, res) => {
-    handle(req, res).catch((err: unknown) => {
-      log.error({ err: errInfo(err) }, "request failed");
-      if (!res.headersSent) send(res, 500, { error: "Internal error" });
-    });
-  }).listen(env.PORT, () => log.info({ port: env.PORT, mailbox: env.INTAKE_MAILBOX, dryRun: env.DRY_RUN }, "ep-lead-intake listening"));
-
+  await check("crm reference", async () => {
+    const ref = await getReference();
+    return `${ref.users.length} users, ${ref.services.length} services`;
+  });
   await renewWatch("boot");
+
+  console.log(`ep-lead-intake started on port ${env.PORT}${env.DRY_RUN ? " (DRY RUN: no leads created, no mail sent)" : ""}`);
+
   await sweep("boot");
   setInterval(() => void renewWatch("daily"), DAY_MS);
   // Picks up mail whose push was missed and retries mail that failed transiently.
@@ -95,16 +161,23 @@ process.on("uncaughtException", (err) => {
 
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.once(signal, () => {
-    log.info({ signal, queue: queueStatus() }, "shutting down");
+    console.log(`shutting down (${signal}), ${queueStatus().pending} mail(s) still queued`);
     void exit(0);
   });
 }
 
 main().catch(async (err: unknown) => {
-  log.fatal({ err: errInfo(err) }, "boot failed");
-  // An invalid environment means alerts cannot be configured either.
-  if (!(err instanceof Error && err.message.startsWith("Invalid environment"))) {
-    await alert({ stage: "Boot", summary: "service failed to start", error: err });
+  const step = err instanceof StartupError ? err.step : "startup";
+  const cause = err instanceof StartupError ? err.cause : err;
+
+  if (cause instanceof EnvError) {
+    // Without a valid environment there is no alert address either: the log is the only report.
+    log.fatal({ step, missing: cause.missing, invalid: cause.invalid }, `startup failed: ${cause.message}`);
+    return exit(1);
   }
+
+  const hint = hintFor(cause);
+  log.fatal({ step, err: errInfo(cause), hint }, `startup failed at "${step}": ${errInfo(cause).message}${hint ? ` (fix: ${hint})` : ""}`);
+  await alert({ stage: "Boot", summary: `service failed to start at "${step}"`, error: cause, ...(hint ? { extra: { fix: hint } } : {}) });
   await exit(1);
 });

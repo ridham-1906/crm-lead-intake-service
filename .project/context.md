@@ -21,7 +21,9 @@ Per message (`src/process.ts`): fetch + parse → skip if already outcome-labell
 - No database: outcome labels are the state. Unlabelled mail is retried by the next sweep; a retry after a create gets a CRM 409 and lands in review.
 - Transient failures (CRM 401/5xx/network, all AI models down, Gmail errors) throw, leave the mail unlabelled and trigger an alert. Content problems go to review.
 - Alerts (`src/alert.ts`) go to `ALERT_EMAIL` via the intake mailbox, throttled per stage+error for `ALERT_THROTTLE_MINUTES`. Single-model 429s don't alert; other single-model errors do.
+- Assignment: salespeople = To: recipients who are CRM users, minus sender, `INTAKE_MAILBOX` and `LEAD_GENERATOR_EMAIL` (`recipientAssignees`, in code). They are given to the AI as `<assignees>` and override its pick. If none, the AI maps owners named in the text. Cc never assigns.
 - Mobiles: any country. Dial code taken from the `+code` written before the number in the mail, else the AI's, else +91; +91 numbers must be 10 digits starting 6-9, others must fit E.164 (≤ 15 digits).
+- Startup (`src/server.ts`) runs named steps (environment → Gmail sign-in → labels → HTTP listen), printing `startup: <step> ok` to the console only (not Loki, no config values); any failure logs `startup failed at "<step>"` with a `hint` and exits 1. CRM reference and Gmail watch are non-fatal checks. `getEnv()` throws `EnvError` with separate `missing` / `invalid` lists (never values). Final `ep-lead-intake started on port …` console line has no config values.
 - Boot asserts the Gmail token's account equals `INTAKE_MAILBOX`. `COMPANY_NAME` feeds the prompt. The intake mailbox and allowed senders' domains are treated as internal in validation.
 - Single replica only (in-memory queue).
 - `DRY_RUN=true`: no CRM call, no labels, no replies/forwards; alerts still sent; processed ids remembered in memory.
