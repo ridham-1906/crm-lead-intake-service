@@ -1,0 +1,36 @@
+{
+  "name": "ep-lead-intake",
+  "version": "1.0.0",
+  "description": "Turns inquiry emails into EP CRM leads",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "dev": "node --env-file-if-exists=.env --import tsx src/server.ts",
+    "authorize": "node --env-file-if-exists=.env --import tsx scripts/authorize.ts",
+    "dry-run": "node --env-file-if-exists=.env --import tsx scripts/dry-run.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "google-auth-library": "^11.3.2",
+    "googleapis": "^188.0.0",
+    "pino": "^10.4.0",
+    "pino-loki": "^3.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.13.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  },
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  }
+}
