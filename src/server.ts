@@ -5,7 +5,7 @@ import { getReference } from "./crm.js";
 import { EnvError, getEnv } from "./env.js";
 import { alert } from "./alert.js";
 import { assertMailbox, ensureLabels, watch } from "./gmail.js";
-import { errInfo, flushLogs, log } from "./log.js";
+import { dumpToConsole, errInfo, flushLogs, log } from "./log.js";
 import { queueStatus, sweep } from "./queue.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -25,6 +25,32 @@ async function isPubSubRequest(req: IncomingMessage): Promise<boolean> {
   }
 }
 
+// Reads a small request body (Pub/Sub pushes are well under 64 KB); anything beyond the limit is dropped.
+function readBody(req: IncomingMessage, limit = 64 * 1024): Promise<string> {
+  return new Promise((resolve) => {
+    let size = 0;
+    const chunks: Buffer[] = [];
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (size <= limit) chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", () => resolve(""));
+  });
+}
+
+// The push envelope plus its base64 `message.data`, which Gmail fills with { emailAddress, historyId }.
+function decodePush(body: string): unknown {
+  try {
+    const envelope = JSON.parse(body) as { message?: { data?: string } };
+    const data = envelope.message?.data;
+    const decoded: unknown = data ? JSON.parse(Buffer.from(data, "base64").toString("utf8")) : undefined;
+    return { envelope, decodedData: decoded };
+  } catch {
+    return body || "(empty body)";
+  }
+}
+
 function send(res: ServerResponse, status: number, body?: object): void {
   res.writeHead(status, body ? { "Content-Type": "application/json" } : {});
   res.end(body ? JSON.stringify(body) : undefined);
@@ -36,10 +62,14 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   if (req.method === "GET" && path === "/health") return send(res, 200, { ok: true, queue: queueStatus() });
 
   if (req.method === "POST" && path === "/gmail/push") {
-    req.resume();
-    if (!(await isPubSubRequest(req))) return send(res, 401, { error: "Unauthorized" });
+    const body = await readBody(req);
+    if (!(await isPubSubRequest(req))) {
+      if (getEnv().DEBUG_DUMP) dumpToConsole("Pub/Sub push REJECTED (bad or missing OIDC token)", decodePush(body));
+      return send(res, 401, { error: "Unauthorized" });
+    }
     // Ack first; the push carries no data we need, it only triggers a search.
     send(res, 204);
+    if (getEnv().DEBUG_DUMP) dumpToConsole("Pub/Sub push received", decodePush(body));
     void sweep("push");
     return;
   }

@@ -6,7 +6,7 @@ Standalone Node 22 / TypeScript (ESM) service that turns inquiry emails to a con
 
 Gmail filter labels allowed senders' mail `Lead-Intake` → `users.watch` (that label) → Pub/Sub push → `POST /gmail/push` (OIDC verified, 204 immediately) → `sweep()` searches `label:Lead-Intake -label:CRM-Done -label:CRM-Review -label:CRM-Ignored` → `enqueue()` → single worker drains the FIFO queue one message at a time (`src/queue.ts`). Sweeps also run on boot and every `SWEEP_INTERVAL_MINUTES`; the Gmail watch is renewed daily.
 
-Per message (`src/process.ts`): fetch + parse → skip if already outcome-labelled → allowlist + Gmail `Authentication-Results` (DMARC, or SPF+DKIM) → CRM reference (cached 5 min) → AI draft via OpenRouter (`src/extract.ts`) → code validation → CRM create → reply / forward → outcome label **last**.
+Per message (`src/process.ts`): fetch + parse → skip if already outcome-labelled → allowlist + Gmail `Authentication-Results` (DMARC, or SPF+DKIM) → CRM reference (cached 5 min) → AI draft via Groq/OpenRouter (`src/extract.ts`, `src/ai.ts`) → code validation → CRM create → (review: forward to `LEAD_GENERATOR_EMAIL`) → outcome label **last**. The service only ever sends two kinds of mail: the review forward and error alerts. No replies to the sender; on success the CRM notifies assignees.
 
 ## AI (Groq first, then OpenRouter)
 
@@ -22,10 +22,12 @@ Per message (`src/process.ts`): fetch + parse → skip if already outcome-labell
 - Transient failures (CRM 401/5xx/network, all AI models down, Gmail errors) throw, leave the mail unlabelled and trigger an alert. Content problems go to review.
 - Alerts (`src/alert.ts`) go to `ALERT_EMAIL` via the intake mailbox, throttled per stage+error for `ALERT_THROTTLE_MINUTES`. Single-model 429s don't alert; other single-model errors do.
 - Assignment: salespeople = To: recipients who are CRM users, minus sender, `INTAKE_MAILBOX` and `LEAD_GENERATOR_EMAIL` (`recipientAssignees`, in code). They are given to the AI as `<assignees>` and override its pick. If none, the AI maps owners named in the text. Cc never assigns.
+- Reference cache refresh (`draftLead`): a To: address on one of our domains that the cached users list lacks (`unknownColleagues`) forces a fresh fetch before the AI call; an `Unknown salesperson/service` validation failure forces one fresh fetch and a re-check without a second AI call; a CRM 400 about salesperson/service/lead access clears the cache (`invalidateReference`). A copy fetched under 2 s ago is never re-fetched.
 - Mobiles: any country. Dial code taken from the `+code` written before the number in the mail, else the AI's, else +91; +91 numbers must be 10 digits starting 6-9, others must fit E.164 (≤ 15 digits).
 - Startup (`src/server.ts`) runs named steps (environment → Gmail sign-in → labels → HTTP listen), printing `startup: <step> ok` to the console only (not Loki, no config values); any failure logs `startup failed at "<step>"` with a `hint` and exits 1. CRM reference and Gmail watch are non-fatal checks. `getEnv()` throws `EnvError` with separate `missing` / `invalid` lists (never values). Final `ep-lead-intake started on port …` console line has no config values.
 - Boot asserts the Gmail token's account equals `INTAKE_MAILBOX`. `COMPANY_NAME` feeds the prompt. The intake mailbox and allowed senders' domains are treated as internal in validation.
 - Single replica only (in-memory queue).
+- `DEBUG_DUMP=true`: console dump of every Pub/Sub push (decoded `message.data`), and per-mail temp files `<tmpdir>/ep-lead-intake/<gmail-id>.txt` (mail, sender check, AI input, AI result, validation). Console/file only, never Loki.
 - `DRY_RUN=true`: no CRM call, no labels, no replies/forwards; alerts still sent; processed ids remembered in memory.
 - Logs: pino to stdout, plus Grafana Loki via pino-loki when `LOKI_URL` is set (same stack and label scheme as ep-crm: `app=ep-lead-intake`, `env`, `level`; 2 s batches; `flushLogs()` before exit). Errors go through `errInfo()` (name, message, status, stack only) and a redact list covers auth/token keys.
 

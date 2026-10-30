@@ -17,7 +17,7 @@ const good: LeadPayload = {
   email: "Anita.Rao@sunrisefoods.in",
   mobile: "9876543210",
   mobileCountryCode: "+91",
-  source: "Email inquiry",
+  source: "Email marketing",
   services: ["radio"],
   salesPersonEmails: ["Priya@excellentpublicity.com"],
 };

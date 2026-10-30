@@ -1,3 +1,6 @@
+import { appendFile, mkdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { pino, type LoggerOptions } from "pino";
 
 const APP = "ep-lead-intake";
@@ -63,4 +66,19 @@ export function errInfo(err: unknown): { name: string; message: string; status?:
   if (!(err instanceof Error)) return { name: "Unknown", message: String(err) };
   const e = err as Error & { status?: unknown; code?: unknown };
   return { name: e.name, message: e.message, status: e.status, code: e.code, stack: e.stack };
+}
+
+// DEBUG_DUMP only: console and temp-file copies of what the service receives. Never sent to Loki.
+export const DUMP_DIR = join(tmpdir(), "ep-lead-intake");
+
+export function dumpToConsole(title: string, data: unknown): void {
+  console.log(`\n===== ${title} =====\n${typeof data === "string" ? data : JSON.stringify(data, null, 2)}\n`);
+}
+
+// Appends a section to <tmp>/ep-lead-intake/<messageId>.txt and returns the file path.
+export async function dumpToFile(messageId: string, title: string, text: string): Promise<string> {
+  const file = join(DUMP_DIR, `${messageId}.txt`);
+  await mkdir(DUMP_DIR, { recursive: true });
+  await appendFile(file, `===== ${title} (${new Date().toISOString()}) =====\n${text}\n\n`, "utf8");
+  return file;
 }

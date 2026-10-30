@@ -48,6 +48,7 @@ const schema = z.object({
 
   SWEEP_INTERVAL_MINUTES: z.coerce.number().int().positive().default(10),
   DRY_RUN: bool,
+  DEBUG_DUMP: bool,
 }).superRefine((env, ctx) => {
   if (env.GROQ_MODELS.length && !env.GROQ_API_KEY) {
     ctx.addIssue({ code: "custom", path: ["GROQ_API_KEY"], message: "required when GROQ_MODELS is set" });

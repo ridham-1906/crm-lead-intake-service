@@ -41,11 +41,7 @@ You can reach me at +91 98765 43210.
 Anita Rao, Marketing Manager
 ```
 
-Within a few seconds the sender gets a reply in the same thread:
-
-> Lead #812 created for Sunrise Foods Pvt Ltd, assigned to Priya Shah.
-
-The lead created in the CRM:
+Within a few seconds the lead is created in the CRM, and the mail gets the `CRM-Done` label. The service sends no confirmation mail; the CRM notifies the assigned salespeople itself. The lead created:
 
 ```json
 {
@@ -57,7 +53,7 @@ The lead created in the CRM:
   "city": "Pune",
   "budget": "5 lakhs",
   "notes": "Radio campaign across Maharashtra, first two weeks of November (Diwali).",
-  "source": "Email inquiry",
+  "source": "Email marketing",
   "services": ["Radio"],
   "salesPersonEmails": ["priya@excellentpublicity.com"]
 }
@@ -75,11 +71,9 @@ The CRM notifies Priya through the bell and by email.
 | Make sure the client's email or phone number is in the mail | The service never guesses contact details |
 | Send one client per mail | A mail about several companies is sent to review |
 
-When something is missing, the sender gets a reply such as:
+When something is missing, the lead generator (`LEAD_GENERATOR_EMAIL`) receives the original mail with the reason and the AI's draft at the top, and adds the lead by hand. Nothing is ever dropped silently.
 
-> Couldn't create this lead automatically (No salesperson named to handle the lead). Forwarded to leadgen@excellentpublicity.com to add by hand.
-
-The lead generator receives the original mail with the reason and the AI's draft at the top. Nothing is ever dropped silently.
+The service sends mail in exactly two cases: this review forward, and error alerts to `ALERT_EMAIL` (§7). It never replies to the sender.
 
 ---
 
@@ -99,12 +93,14 @@ Each mail ends with one Gmail label. The labels are the record of what happened;
 
 | Label | Meaning | Who is told |
 |---|---|---|
-| `CRM-Done` | Lead created | Sender gets "Lead #N created …" |
-| `CRM-Review` | Lead not created (missing details, ambiguous owner, duplicate lead, CRM refused it) | Lead generator gets the forward; sender gets "Couldn't create …" |
+| `CRM-Done` | Lead created | Nobody by this service; the CRM notifies the assigned salespeople |
+| `CRM-Review` | Lead not created (missing details, ambiguous owner, duplicate lead, CRM refused it) | Lead generator gets the forward with the reason |
 | `CRM-Ignored` | Sender isn't allowed, or the mail failed authentication (DMARC/SPF/DKIM) | Nobody |
 | *(no label yet)* | Not processed yet, or failed on our side (AI down, CRM down) and waiting for a retry | `ALERT_EMAIL`, if it's an error |
 
 To have a mail processed again, remove its `CRM-…` label in Gmail. The next sweep picks it up.
+
+**New CRM users and services.** The CRM's user and service lists are cached for 5 minutes. A salesperson or service added in the CRM inside that window still works: when a mail mentions one the cached list doesn't know, the service fetches the lists again before deciding. Only if the fresh lists don't have it either does the mail go to review.
 
 **Checks the AI can't bypass.** Whatever the AI returns, the code refuses the lead unless:
 - the client email or phone number literally appears in the mail;
@@ -166,6 +162,7 @@ All variables are in [example.env](../example.env), with comments.
 | `ALERT_THROTTLE_MINUTES` | | `60` | Minimum gap between two alerts for the same error |
 | `SWEEP_INTERVAL_MINUTES` | | `10` | How often the mailbox is searched for unprocessed mail |
 | `DRY_RUN` | | `false` | `true`: no CRM call, labels, replies or forwards |
+| `DEBUG_DUMP` | | `false` | `true`: prints each Pub/Sub push to the console and writes each fetched mail to `<temp>/ep-lead-intake/<gmail-id>.txt` (§8) |
 
 ---
 
@@ -261,6 +258,7 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 ## 8. Going live
 
 1. **Try single mails.** With `.env` filled in locally, run `npm run dry-run -- <gmail-message-id>`. The id is the last part of the Gmail URL when the mail is open. This prints the draft and the checks, and sends nothing. Do this for 10–20 real inquiries. If drafts are wrong, adjust the prompt in `src/extract.ts`.
+   To see exactly what arrives, set `DEBUG_DUMP=true` locally. Each Pub/Sub push prints to the console with its decoded `{ emailAddress, historyId }`. Each fetched mail gets a file in your temp folder (on Windows `%TEMP%ep-lead-intake<gmail-id>.txt`), with the parsed headers and body, the sender check, the exact AI input, the AI result and the validation. The console prints the file path. These files contain client data, so keep `DEBUG_DUMP=false` in production.
 2. **Dry run in production.** Deploy with `DRY_RUN=true` for a few days. Compare the `dry run: lead not created` and `mail sent to review` log lines with what the lead generator entered by hand.
 3. **Switch on.** Set `DRY_RUN=false`. Mail that arrived during the dry run has no labels, so the first sweep processes it for real.
 
@@ -297,6 +295,7 @@ Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `lev
 | `startup failed: Environment is not valid (…)` | critical | Variables missing or malformed; lists them in `missing` / `invalid`; the service exits |
 | `startup failed at "<step>": …` | critical | A startup step failed; `hint` says how to fix it; the service exits and an alert is attempted |
 | `mail queued` | info | Mail added to the queue |
+| `crm reference refreshed` | info | The cached CRM users/services list missed someone (a new colleague in To:, or an unknown salesperson/service), so it was fetched again |
 | `AI answered` | info | Which model drafted a mail (`groq:…` or `openrouter:…`) |
 | `AI answer unusable; trying next` | warning | A model's reply wasn't valid lead JSON |
 | `model rejected json_schema; using json_object` | warning | A model doesn't support strict JSON schema |

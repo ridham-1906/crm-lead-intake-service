@@ -193,10 +193,6 @@ export function buildRawMail(m: OutgoingMail): string {
   return Buffer.from(raw, "utf8").toString("base64url");
 }
 
-export function replySubject(subject: string): string {
-  return /^re:/i.test(subject) ? subject : `Re: ${subject}`;
-}
-
 export function forwardSubject(subject: string): string {
   return /^(fwd?|fw):/i.test(subject) ? subject : `Fwd: ${subject}`;
 }

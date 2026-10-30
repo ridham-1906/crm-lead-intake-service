@@ -1,6 +1,6 @@
 import { google, type gmail_v1 } from "googleapis";
 import { getEnv } from "./env.js";
-import { buildRawMail, forwardSubject, parseMessage, replySubject, type Mail } from "./mail.js";
+import { buildRawMail, forwardSubject, parseMessage, type Mail } from "./mail.js";
 
 export const DONE = "CRM-Done";
 export const REVIEW = "CRM-Review";
@@ -104,16 +104,6 @@ export async function addLabel(id: string, name: OutcomeLabel): Promise<void> {
 export async function sendMail(to: string, subject: string, text: string): Promise<void> {
   const raw = buildRawMail({ to, subject, text });
   await gmail().users.messages.send({ userId: "me", requestBody: { raw } });
-}
-
-export async function reply(mail: Mail, text: string): Promise<void> {
-  const raw = buildRawMail({
-    to: mail.from,
-    subject: replySubject(mail.subject),
-    text,
-    inReplyTo: mail.messageIdHeader || undefined,
-  });
-  await gmail().users.messages.send({ userId: "me", requestBody: { raw, threadId: mail.threadId } });
 }
 
 // Forwards the mail as text below the note, with the original attached as an .eml file.

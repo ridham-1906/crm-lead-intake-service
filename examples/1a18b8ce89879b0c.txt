@@ -1,0 +1,500 @@
+===== Mail received (2026-10-30T06:43:54.271Z) =====
+Gmail id:   1a18b8ce89879b0c  (thread 1a18b8ce89879b0c)
+Labels:     UNREAD, INBOX, Label_1222915040592129127
+From:       Man Navlakha <man@excellentpublicity.com>
+To:         huzef@excellentpublicity.com
+Cc:         vaishal@growwithexcellentpublicity.com
+Subject:    Fwd: FW: Victoria, meeting request from Mr. Manan Joshi for Prima Luxury
+Date:       Fri, 30 Oct 2026 12:13:37 +0530
+Auth:       mx.google.com;       dkim=pass header.i=@excellentpublicity.com header.s=google header.b=aCmQRr1I;       arc=pass (i=1);       spf=pass (google.com: domain of man@excellentpublicity.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=man@excellentpublicity.com;       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=excellentpublicity.com;       dara=neutral header.i=@growwithexcellentpublicity.com
+Body chars: 4892
+
+Feel free to contact us in case of any query.
+
+Thanking you,
+With best regards,
+[image: Atlas by Excellent Publicity]
+<https://atlas.excellentpublicity.com/>
+[image: Man Navlakha - Excellent Publicity]
+
+
+---------- Forwarded message ---------
+From: <vaishal@excellentpublicity.com>
+Date: Mon, Oct 26, 2026 at 5:15 PM
+Subject: FW: Victoria, meeting request from Mr. Manan Joshi for Prima Luxury
+To: <akash@excellentpublicity.com>, <manan@excellentpublicity.com>
+Cc: Man Navlakha <man@excellentpublicity.com>
+
+
+Akash & Manan
+
+
+
+PFB
+
+
+
+victoria@primaluxury.com
+
+
+
+*------------------------------------------------------------------------------------------------------*
+
+*A thousand people have every great idea. One becomes successful. *
+
+The difference comes down to *execution* that takes years of *irrational
+persistence*.
+
+*------------------------------------------------------------------------------------------------------*
+
+*------------------------------------------------------------------------------------------------------*
+
+*Thanking you,*
+
+*With best regards,*
+
+
+
+
+
+Disclaimer: The information in this message is confidential and may be
+legally privileged. It is intended solely for the addressee/recipient.
+Access to this message by any one else is unauthorized. If you are not the
+intended addressee/recipient any disclosure, copying or distribution of the
+message, or any action or omission taken by you by relying on it is
+prohibited and may be unlawful. Please notify the addressor/sender
+immediately if you have received this message in error. The organization is
+not responsible for any damage caused by a virus or an alteration of the
+e-mail by a third party or otherwise. The contents of this message may not
+necessarily represent the views or the policies of the organization.
+
+
+
+*From:* Radhika Joshi <Radhika@excellentpublicityind.in>
+*Sent:* 26 October 2026 17:14
+*To:* inquiry@excellentpublicity.com
+*Subject:* Re: Victoria, meeting request from Mr. Manan Joshi for Prima
+Luxury
+
+
+
+---------- Forwarded message ---------
+From: *Victoria Zakrevskaya* <victoria@primaluxury.com>
+Date: Mon, Oct 26, 2026 at 05:10 pm
+Subject: Re: Victoria, meeting request from Mr. Manan Joshi for Prima Luxury
+To: <Radhika@excellentpublicityind.in>
+
+
+
+Dear Radhika,
+
+Thank you for reaching out.
+
+Could you please share more details or a portfolio regarding your recent
+campaigns? I would like to review this information before we consider a
+meeting.
+
+Best regards,
+
+*Victoria Zakrevskaya* *|* Senior Director of Marketing
+
+<http://www.primaluxury.com/>
+
+Office 520, Fairmont Hotel, Sheikh Zayed Road,
+
+P.O. Box 46685, Dubai, UAE
+
+
+
+*T *+971 4 379 9507 <+971%204%20379%209507> *M *+971 52 623 7240
+<+971%2052%20623%207240>
+
+*W* www.primaluxury.com
+
+*E* victoria@primaluxury.com <viktoria@primaluxury.com>
+
+
+
+Facebook <https://www.facebook.com/Primaluxury>  |  Instagram
+<https://www.instagram.com/primaluxuryrealestate/>  |  LinkedIn
+<https://www.linkedin.com/company/prima-luxury-real-estate-broker/>
+
+
+
+License No.: 600282  |  ORN: 1511
+
+*IMPORTANT**: The contents of this email and any attachments are
+confidential. They are intended for the named recipient(s) only. If you
+have received this email by mistake, please notify the sender immediately
+and do not disclose the contents to anyone or make copies thereof.*
+
+
+
+
+
+
+
+On Mon, Oct 26, 2026 at 10:03 AM Radhika Joshi <
+Radhika@excellentpublicityind.in> wrote:
+
+Hi Victoria,
+
+I am writing on behalf of Mr. Manan Joshi, co-founder at Excellent
+Publicity - India as well as UAE.
+
+Someone from the EO or YPO networking communities informed him about Prima
+Luxury looking for a reliable media partner to plan and execute advertising
+campaigns.
+
+We have recently executed some of the most popular advertising campaigns
+and it would be a pleasure to chat with you about what collaborations we
+can explore for Prima Luxury.
+
+Radhika Joshi
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+
+
+
+On Mon, Oct 26, 2026 at 06:03 AM UTC <Radhika@excellentpublicityind.in>
+wrote:
+
+Hi Victoria,
+
+I am writing on behalf of Mr. Manan Joshi, co-founder at Excellent
+Publicity - India as well as UAE.
+
+Someone from the EO or YPO networking communities informed him about Prima
+Luxury looking for a reliable media partner to plan and execute advertising
+campaigns.
+
+We have recently executed some of the most popular advertising campaigns
+and it would be a pleasure to chat with you about what collaborations we
+can explore for Prima Luxury.
+
+
+Radhika Joshi
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+
+===== Sender check (2026-10-30T06:43:54.272Z) =====
+passed (allowed sender, authenticated)
+
+===== AI input (exactly what the model receives) (2026-10-30T06:43:54.273Z) =====
+<users>
+aayush.sharma <aayush.sharma@excellentpublicity.com>
+abhinav <abhinav@excellentpublicity.com>
+abhishek.sonar <abhishek.sonar@excellentpublicity.com>
+akash <akash@excellentpublicity.com>
+ami <ami@excellentpublicity.com>
+amisha <amisha@excellentpublicity.com>
+amit <amit@excellentpublicity.com>
+atish <atish@excellentpublicity.com>
+bhavinee <bhavinee@excellentpublicity.com>
+dev <dev@excellentpublicity.com>
+drashti <drashti@excellentpublicity.com>
+ekta <ekta@excellentpublicity.com>
+hemanth <hemanth@excellentpublicity.com>
+hitaksh <hitaksh@excellentpublicity.com>
+huzef <huzef@excellentpublicity.com>
+jahanvi <jahanvi@excellentpublicity.com>
+karan.sharma <karan.sharma@excellentpublicity.com>
+kaushik <kaushik@excellentpublicity.com>
+maitreyee <maitreyee@excellentpublicity.com>
+man+admin <man+admin@excellentpublicity.com>
+man <man@excellentpublicity.com>
+manan <manan@excellentpublicity.com>
+manav <manav@excellentpublicity.com>
+mayurdhwaj <mayurdhwaj@excellentpublicity.com>
+mohit.bhandari <mohit.bhandari@excellentpublicity.com>
+neer <neer@excellentpublicity.com>
+neha.chauhan <neha.chauhan@excellentpublicity.com>
+nihal <nihal@excellentpublicity.com>
+pankti <pankti@excellentpublicity.com>
+poojan.joshi <poojan.joshi@excellentpublicity.com>
+prahar <prahar@excellentpublicity.com>
+pratham <pratham@excellentpublicity.com>
+priya <priya@excellentpublicity.com>
+priyansh <priyansh@excellentpublicity.com>
+rashmi <rashmi@excellentpublicity.com>
+rhythem <rhythem@excellentpublicity.com>
+ridham+sale <ridham+sale@excellentpublicity.com>
+ridham <ridham@excellentpublicity.com>
+rudra <rudra@excellentpublicity.com>
+rudraksh <rudraksh@excellentpublicity.com>
+rutvik <rutvik@excellentpublicity.com>
+sakshi.thakkar <sakshi.thakkar@excellentpublicity.com>
+shailendra <shailendra@excellentpublicity.com>
+shivani <shivani@excellentpublicity.com>
+snehal <snehal@excellentpublicity.com>
+surbhi <surbhi@excellentpublicity.com>
+tamanna <tamanna@excellentpublicity.com>
+tanvi <tanvi@excellentpublicity.com>
+vaishal <vaishal@excellentpublicity.com>
+vidhi.dodhia <vidhi.dodhia@excellentpublicity.com>
+viral <viral@excellentpublicity.com>
+vishal.makwana <vishal.makwana@excellentpublicity.com>
+yogesh <yogesh@excellentpublicity.com>
+</users>
+<services>
+- Cinema
+- Digital
+- Digital PR
+- GTM
+- Gifting - Vouchers
+- In-app and OTT
+- Influencer Marketing
+- Performance Marketing
+- Portal
+- Programmatic Ads
+- Radio
+- SEO
+- Social Media
+- Television
+- Activation
+- Airport
+- BTL
+- Celebrity Endorsement
+- Corporate Gifting
+- Events & Sponsorships
+- Gifting - Products
+- Gifting - Tickets & Experiences
+- In-Film and Out-Film
+- Inflight
+- Magazine
+- Newspaper
+- Non Traditional
+- Offline
+- Others
+- Outdoor
+- Outdoor 1
+- Outdoor 2
+- Outdoor 3
+- Outdoor 4
+- Outdoor 5
+- Outdoor 6
+- Retail Marketing and Merchandising
+- Sports Marketing
+- Transit
+</services>
+<assignees>
+huzef@excellentpublicity.com
+</assignees>
+<mail>
+From: Man Navlakha <man@excellentpublicity.com>
+To: huzef@excellentpublicity.com
+Cc: vaishal@growwithexcellentpublicity.com
+Date: Fri, 30 Oct 2026 12:13:37 +0530
+Subject: Fwd: FW: Victoria, meeting request from Mr. Manan Joshi for Prima Luxury
+
+Feel free to contact us in case of any query.
+
+Thanking you,
+With best regards,
+[image: Atlas by Excellent Publicity]
+<https://atlas.excellentpublicity.com/>
+[image: Man Navlakha - Excellent Publicity]
+
+
+---------- Forwarded message ---------
+From: <vaishal@excellentpublicity.com>
+Date: Mon, Oct 26, 2026 at 5:15 PM
+Subject: FW: Victoria, meeting request from Mr. Manan Joshi for Prima Luxury
+To: <akash@excellentpublicity.com>, <manan@excellentpublicity.com>
+Cc: Man Navlakha <man@excellentpublicity.com>
+
+
+Akash & Manan
+
+
+
+PFB
+
+
+
+victoria@primaluxury.com
+
+
+
+*------------------------------------------------------------------------------------------------------*
+
+*A thousand people have every great idea. One becomes successful. *
+
+The difference comes down to *execution* that takes years of *irrational
+persistence*.
+
+*------------------------------------------------------------------------------------------------------*
+
+*------------------------------------------------------------------------------------------------------*
+
+*Thanking you,*
+
+*With best regards,*
+
+
+
+
+
+Disclaimer: The information in this message is confidential and may be
+legally privileged. It is intended solely for the addressee/recipient.
+Access to this message by any one else is unauthorized. If you are not the
+intended addressee/recipient any disclosure, copying or distribution of the
+message, or any action or omission taken by you by relying on it is
+prohibited and may be unlawful. Please notify the addressor/sender
+immediately if you have received this message in error. The organization is
+not responsible for any damage caused by a virus or an alteration of the
+e-mail by a third party or otherwise. The contents of this message may not
+necessarily represent the views or the policies of the organization.
+
+
+
+*From:* Radhika Joshi <Radhika@excellentpublicityind.in>
+*Sent:* 26 October 2026 17:14
+*To:* inquiry@excellentpublicity.com
+*Subject:* Re: Victoria, meeting request from Mr. Manan Joshi for Prima
+Luxury
+
+
+
+---------- Forwarded message ---------
+From: *Victoria Zakrevskaya* <victoria@primaluxury.com>
+Date: Mon, Oct 26, 2026 at 05:10 pm
+Subject: Re: Victoria, meeting request from Mr. Manan Joshi for Prima Luxury
+To: <Radhika@excellentpublicityind.in>
+
+
+
+Dear Radhika,
+
+Thank you for reaching out.
+
+Could you please share more details or a portfolio regarding your recent
+campaigns? I would like to review this information before we consider a
+meeting.
+
+Best regards,
+
+*Victoria Zakrevskaya* *|* Senior Director of Marketing
+
+<http://www.primaluxury.com/>
+
+Office 520, Fairmont Hotel, Sheikh Zayed Road,
+
+P.O. Box 46685, Dubai, UAE
+
+
+
+*T *+971 4 379 9507 <+971%204%20379%209507> *M *+971 52 623 7240
+<+971%2052%20623%207240>
+
+*W* www.primaluxury.com
+
+*E* victoria@primaluxury.com <viktoria@primaluxury.com>
+
+
+
+Facebook <https://www.facebook.com/Primaluxury>  |  Instagram
+<https://www.instagram.com/primaluxuryrealestate/>  |  LinkedIn
+<https://www.linkedin.com/company/prima-luxury-real-estate-broker/>
+
+
+
+License No.: 600282  |  ORN: 1511
+
+*IMPORTANT**: The contents of this email and any attachments are
+confidential. They are intended for the named recipient(s) only. If you
+have received this email by mistake, please notify the sender immediately
+and do not disclose the contents to anyone or make copies thereof.*
+
+
+
+
+
+
+
+On Mon, Oct 26, 2026 at 10:03 AM Radhika Joshi <
+Radhika@excellentpublicityind.in> wrote:
+
+Hi Victoria,
+
+I am writing on behalf of Mr. Manan Joshi, co-founder at Excellent
+Publicity - India as well as UAE.
+
+Someone from the EO or YPO networking communities informed him about Prima
+Luxury looking for a reliable media partner to plan and execute advertising
+campaigns.
+
+We have recently executed some of the most popular advertising campaigns
+and it would be a pleasure to chat with you about what collaborations we
+can explore for Prima Luxury.
+
+Radhika Joshi
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+
+
+
+On Mon, Oct 26, 2026 at 06:03 AM UTC <Radhika@excellentpublicityind.in>
+wrote:
+
+Hi Victoria,
+
+I am writing on behalf of Mr. Manan Joshi, co-founder at Excellent
+Publicity - India as well as UAE.
+
+Someone from the EO or YPO networking communities informed him about Prima
+Luxury looking for a reliable media partner to plan and execute advertising
+campaigns.
+
+We have recently executed some of the most popular advertising campaigns
+and it would be a pleasure to chat with you about what collaborations we
+can explore for Prima Luxury.
+
+
+Radhika Joshi
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+</mail>
+
+===== AI result (2026-10-30T06:43:55.029Z) =====
+{
+  "ok": true,
+  "payload": {
+    "companyName": "Prima Luxury",
+    "source": "Email marketing",
+    "salesPersonEmails": [
+      "huzef@excellentpublicity.com"
+    ],
+    "email": "victoria@primaluxury.com",
+    "mobile": "526237240",
+    "contactName": "Victoria Zakrevskaya",
+    "designation": "Senior Director of Marketing",
+    "city": "Dubai",
+    "notes": "Inquiry regarding media partnership to plan and execute advertising campaigns. Contact requested portfolio details of recent campaigns before confirming a meeting. Inquired about possible collaboration.",
+    "mobileCountryCode": "+971"
+  }
+}
+
+===== Validation (2026-10-30T06:43:55.031Z) =====
+{
+  "ok": true,
+  "payload": {
+    "companyName": "Prima Luxury",
+    "email": "victoria@primaluxury.com",
+    "mobile": "526237240",
+    "mobileCountryCode": "+971",
+    "contactName": "Victoria Zakrevskaya",
+    "designation": "Senior Director of Marketing",
+    "city": "Dubai",
+    "notes": "Inquiry regarding media partnership to plan and execute advertising campaigns. Contact requested portfolio details of recent campaigns before confirming a meeting. Inquired about possible collaboration.",
+    "source": "Email marketing",
+    "salesPersonEmails": [
+      "huzef@excellentpublicity.com"
+    ]
+  }
+}
+

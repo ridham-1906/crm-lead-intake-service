@@ -4,7 +4,8 @@ import type { LeadPayload, Reference } from "./crm.js";
 import { getEnv } from "./env.js";
 import type { Mail } from "./mail.js";
 
-export const SOURCE = "Email inquiry";
+// Must match one of the CRM's sources (case-insensitive) to fill the lead's Source field, not just its notes.
+export const SOURCE = "Email marketing";
 
 // Every field is required and nullable, so strict JSON-schema mode works on every provider.
 const LeadDraft = z.strictObject({
@@ -56,6 +57,15 @@ export function recipientAssignees(mail: Mail, reference: Reference, exclude: st
   const users = new Set(reference.users.map((u) => u.email.toLowerCase()));
   const skip = new Set(exclude.map((e) => e.toLowerCase()));
   return mail.to.filter((a) => users.has(a) && !skip.has(a));
+}
+
+// To: addresses on one of our own domains that the reference doesn't know: a sign the cached user list is stale.
+export function unknownColleagues(mail: Mail, reference: Reference, internalEmails: string[], exclude: string[]): string[] {
+  const domain = (a: string) => a.split("@")[1] ?? "";
+  const users = new Set(reference.users.map((u) => u.email.toLowerCase()));
+  const domains = new Set([...reference.users.map((u) => u.email), ...internalEmails].map((e) => domain(e.toLowerCase())));
+  const skip = new Set(exclude.map((e) => e.toLowerCase()));
+  return mail.to.filter((a) => domains.has(domain(a)) && !users.has(a) && !skip.has(a));
 }
 
 export function buildUserMessage(mail: Mail, reference: Reference, assignees: string[] = []): string {

@@ -1,7 +1,7 @@
 import { getEnv } from "./env.js";
 
 export type User = { name: string; email: string };
-export type Reference = { users: User[]; services: string[] };
+export type Reference = { users: User[]; services: string[]; fetchedAt?: number };
 
 export type LeadPayload = {
   companyName: string;
@@ -71,16 +71,22 @@ export function toReference(body: ReferenceBody): Reference {
   return { users, services };
 }
 
-export async function getReference(): Promise<Reference> {
-  if (referenceCache && Date.now() - referenceCache.at < REFERENCE_TTL_MS) return referenceCache.value;
+// Cached for 5 minutes; pass maxAgeMs = 0 to force a fresh fetch.
+export async function getReference(maxAgeMs = REFERENCE_TTL_MS): Promise<Reference> {
+  if (referenceCache && Date.now() - referenceCache.at < maxAgeMs) return referenceCache.value;
   const { status, body } = await call("/api/leads/bulk-create/reference");
   if (status !== 200) {
     throw new CrmUnavailableError(`CRM reference returned ${status}: ${errorText(body) ?? "no error message"}`);
   }
-  const value = toReference(body as ReferenceBody);
+  const at = Date.now();
+  const value = { ...toReference(body as ReferenceBody), fetchedAt: at };
   if (!value.users.length) throw new CrmUnavailableError("CRM reference has no users");
-  referenceCache = { at: Date.now(), value };
+  referenceCache = { at, value };
   return value;
+}
+
+export function invalidateReference(): void {
+  referenceCache = undefined;
 }
 
 export async function createLead(payload: LeadPayload): Promise<CreateResult> {
