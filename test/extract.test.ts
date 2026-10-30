@@ -33,7 +33,7 @@ describe("interpret", () => {
   };
 
   it("maps a create decision to a clean payload", () => {
-    expect(interpret({ decision: "create", reason: null, lead })).toEqual({
+    expect(interpret({ decision: "create", reviewCode: null, reason: null, lead })).toEqual({
       ok: true,
       payload: {
         companyName: "Sunrise Foods",
@@ -47,12 +47,12 @@ describe("interpret", () => {
   });
 
   it("keeps the draft on review", () => {
-    const result = interpret({ decision: "review", reason: "Two users named Priya", lead });
+    const result = interpret({ decision: "review", reviewCode: "multiple_companies", reason: "Two users named Priya", lead });
     expect(result).toMatchObject({ ok: false, reason: "Two users named Priya", draft: { companyName: "Sunrise Foods" } });
   });
 
   it("reviews when there is no lead", () => {
-    expect(interpret({ decision: "create", reason: null, lead: null })).toMatchObject({ ok: false });
+    expect(interpret({ decision: "create", reviewCode: null, reason: null, lead: null })).toMatchObject({ ok: false });
   });
 });
 
@@ -98,7 +98,9 @@ describe("readAnswer", () => {
 
 describe("systemPrompt", () => {
   it("uses the configured company name", () => {
-    expect(systemPrompt("Acme Media")).toContain("never Acme Media");
+    const prompt = systemPrompt("Acme Media");
+    expect(prompt).toContain("Never use Acme Media");
+    expect(prompt).not.toContain("{{");
   });
 });
 

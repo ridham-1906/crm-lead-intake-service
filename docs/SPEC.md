@@ -156,6 +156,7 @@ All variables are in [example.env](../example.env), with comments.
 | `AI_ROTATION` | | `round-robin` | `round-robin` or `fallback` (§5) |
 | `AI_COOLDOWN_SECONDS` | | `60` | How long a failed model is skipped |
 | `CRM_URL`, `LEAD_IMPORT_API_KEY` | ✓ | | CRM address and import key |
+| `INTERNAL_DOMAINS` | | | Optional. Extra domains that are always ours. Usually left empty: see §5, "Who is us" |
 | `ALLOWED_SENDERS` | ✓ | | Comma-separated senders allowed to submit inquiries |
 | `LEAD_GENERATOR_EMAIL` | ✓ | | Receives mail that needs a human |
 | `ALERT_EMAIL` | ✓ | | Comma-separated addresses for error alerts |
@@ -169,6 +170,23 @@ All variables are in [example.env](../example.env), with comments.
 ## 5. AI models
 
 The AI only reads the mail and drafts the lead. It can't create anything on its own, and every draft goes through the code checks in §2.
+
+**The prompt is a file.** The AI's instructions are in [prompts/system.md](../prompts/system.md). It describes how a SmartLead reply thread looks, who is the client and who is us, where each field is found, what to ignore (our pitch prices, the cross-sell list, our phone numbers, Meet dial-ins), a services vocabulary (railway → Transit, cricket → Sports Marketing, …) and the only reasons a mail may go to review. Edit it as you learn, then restart the service. `{{COMPANY_NAME}}` is filled in from the env.
+
+**What the code does before and after the AI**, so every model gets the same help:
+- **Before:** it removes duplicates and noise from the thread (repeated pitches, signatures, disclaimers, link fragments, dial-ins), usually halving it. It also adds a `<hints>` block: the outside participants (the likely client), a company guess from their domain, our phone numbers, and the client's phone lines with their labels.
+- **After:** the AI may only send a mail to review when there is no client contact at all, the thread is about several companies, or the client clearly declined. A missing mobile, service, budget or city never causes a review. If an email or mobile fails the checks but the other one is fine, the bad one is dropped and noted. Unknown services go to notes. If every model returns unusable output, a minimal lead is built from the hints, with a note to complete it.
+
+**Who is us, without a domain list.** The outreach team writes from many, changing domains, so nothing has to be listed. The code splits each thread into its messages and decides who wrote each one. An author counts as ours when:
+- their domain is already known: a CRM user's domain, the sender's, or the intake mailbox's;
+- their domain contains the company name (`excellentpublicityooh.com`, `…connect.com`, `…ind.in`, …); or
+- their own message carries our signature line ("Excellent Publicity"), our footer ("Feel free to contact us…", "Member of BNI"), our signature image, or reads like our sales pitch.
+
+Their domain is then treated as ours for that thread, and every phone number in their messages counts as ours. Anyone else who wrote in the thread is a client candidate. If one domain is ever misjudged, add it to `INTERNAL_DOMAINS`.
+
+**Prompt caching.** The system prompt and the services list are identical for every mail and come first in each request, so a provider that caches prompts can reuse them (on Groq, cached input is 50% cheaper and doesn't count toward the per-minute limit). Nothing has to be switched on; check `tokens.cached` in the `AI answered` log line. In testing, Groq's `qwen/qwen3.8-27b` and `openai/gpt-oss-120b` served nothing from cache.
+
+**Testing prompt changes:** save DEBUG_DUMP files of real threads in `examples/`, add the expected result to `examples/expected.json`, and run `npm run try-examples`. It replays every thread through the real AI and the checks, and prints PASS/FAIL per thread. It doesn't call the CRM, send mail or send alerts.
 
 **Two providers, Groq first.** The service uses Groq and OpenRouter, both through the same OpenAI-style chat API (no SDK). For each mail it tries:
 
@@ -296,7 +314,7 @@ Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `lev
 | `startup failed at "<step>": …` | critical | A startup step failed; `hint` says how to fix it; the service exits and an alert is attempted |
 | `mail queued` | info | Mail added to the queue |
 | `crm reference refreshed` | info | The cached CRM users/services list missed someone (a new colleague in To:, or an unknown salesperson/service), so it was fetched again |
-| `AI answered` | info | Which model drafted a mail (`groq:…` or `openrouter:…`) |
+| `AI answered` | info | Which model drafted a mail (`groq:…` or `openrouter:…`), with `tokens` `{ input, output, cached }`; `cached` > 0 means the provider served part of the prompt from its cache |
 | `AI answer unusable; trying next` | warning | A model's reply wasn't valid lead JSON |
 | `model rejected json_schema; using json_object` | warning | A model doesn't support strict JSON schema |
 | `lead created` | info | Lead created (`leadId`, `messageId`) |

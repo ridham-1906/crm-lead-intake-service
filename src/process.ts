@@ -4,13 +4,14 @@ import { buildUserMessage, extract, recipientAssignees, unknownColleagues } from
 import * as gmail from "./gmail.js";
 import { dumpToFile, log } from "./log.js";
 import { isSenderAuthenticated, searchableText, type Mail } from "./mail.js";
+import { threadHints } from "./thread.js";
 import { validate } from "./validate.js";
 
 export type Draft = { ok: true; payload: LeadPayload } | { ok: false; reason: string; draft?: LeadPayload };
 
 export type Outcome = "done" | "review" | "ignored" | "skipped";
 
-const STALE_REASON = /^Unknown (salesperson|service)/;
+const STALE_REASON = /^Unknown salesperson/;
 
 // Re-fetches the CRM lists unless this copy was fetched just now.
 async function refreshed(reference: Reference, mailId: string, why: string): Promise<Reference> {
@@ -19,7 +20,14 @@ async function refreshed(reference: Reference, mailId: string, why: string): Pro
   return getReference(0);
 }
 
-// AI extraction followed by code validation; shared with scripts/dry-run.ts.
+// Every domain that is ours: configured INTERNAL_DOMAINS plus the domains of our own known addresses and CRM users.
+export function ourDomains(reference: Reference): string[] {
+  const env = getEnv();
+  const addresses = [env.INTAKE_MAILBOX, env.LEAD_GENERATOR_EMAIL, ...env.ALLOWED_SENDERS, ...reference.users.map((u) => u.email)];
+  return [...new Set([...env.INTERNAL_DOMAINS.map((d) => d.toLowerCase()), ...addresses.map((a) => a.split("@")[1] ?? "")])].filter(Boolean);
+}
+
+// AI extraction followed by code validation; shared with scripts/dry-run.ts and scripts/try-examples.ts.
 // A cached reference that misses a new CRM user or service is refreshed once before giving up.
 export async function draftLead(mail: Mail, cached: Reference): Promise<Draft> {
   const env = getEnv();
@@ -31,18 +39,31 @@ export async function draftLead(mail: Mail, cached: Reference): Promise<Draft> {
   if (unknown.length) reference = await refreshed(reference, mail.id, `To: has unknown colleagues ${unknown.join(", ")}`);
 
   const assignees = recipientAssignees(mail, reference, exclude);
-  if (env.DEBUG_DUMP) await dumpToFile(mail.id, "AI input (exactly what the model receives)", buildUserMessage(mail, reference, assignees));
-  const extracted = await extract(mail, reference, assignees);
+  const domains = ourDomains(reference);
+  const hints = threadHints(mail, domains, env.COMPANY_NAME);
+  if (env.DEBUG_DUMP) await dumpToFile(mail.id, "AI input (exactly what the model receives)", buildUserMessage(mail, reference, assignees, hints));
+  const extracted = await extract(mail, reference, assignees, hints);
   if (env.DEBUG_DUMP) await dumpToFile(mail.id, "AI result", JSON.stringify(extracted, null, 2));
   if (!extracted.ok) return extracted;
 
-  let checked = validate(extracted.payload, reference, searchableText(mail), internal);
-  if (!checked.ok && STALE_REASON.test(checked.reason)) {
-    const fresh = await refreshed(reference, mail.id, checked.reason);
-    if (fresh !== reference) checked = validate(extracted.payload, fresh, searchableText(mail), internal);
+  const payload = { ...extracted.payload };
+  if (!payload.companyName.trim() && hints.companyGuess) payload.companyName = hints.companyGuess;
+  const check = (ref: Reference) => validate(payload, ref, searchableText(mail), internal, {
+      ourDomains: hints.ourDomains,
+      ourPhones: hints.ourPhones,
+      ourAddresses: hints.ourPeople.map((p) => p.email),
+      stem: hints.stem,
+    });
+
+  let checked = check(reference);
+  const stale = checked.ok ? checked.unknownServices.length > 0 : STALE_REASON.test(checked.reason);
+  if (stale) {
+    const why = checked.ok ? `Unknown service: ${checked.unknownServices.join(", ")}` : checked.reason;
+    const fresh = await refreshed(reference, mail.id, why);
+    if (fresh !== reference) checked = check(fresh);
   }
   if (env.DEBUG_DUMP) await dumpToFile(mail.id, "Validation", JSON.stringify(checked, null, 2));
-  return checked.ok ? checked : { ok: false, reason: checked.reason, draft: extracted.payload };
+  return checked.ok ? { ok: true, payload: checked.payload } : { ok: false, reason: checked.reason, draft: payload };
 }
 
 // DEBUG_DUMP: the parsed mail as the service sees it, written to a temp file whose path goes to the console.

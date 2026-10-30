@@ -29,9 +29,15 @@ class ModelError extends Error {
 type ChatResponse = {
   error?: { message?: string; code?: number | string };
   choices?: { finish_reason?: string; message?: { content?: string | null } }[];
+  usage?: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } };
 };
 
-export type Answer = { content: string | undefined; finishReason: string | undefined };
+// usage.cached shows how many input tokens the provider served from its prompt cache.
+export type Answer = {
+  content: string | undefined;
+  finishReason: string | undefined;
+  usage?: { input?: number; output?: number; cached?: number };
+};
 export type ReadResult<T> = { ok: true; value: T } | { ok: false; unusable: string };
 
 let turn = 0;
@@ -117,7 +123,12 @@ async function callModel(target: Target, system: string, user: string, schema: R
     throw new ModelError(`${status}: ${message}`, status, cooldownFrom(res, cooldownMs));
   }
   const choice = data.choices?.[0];
-  return { content: choice?.message?.content ?? undefined, finishReason: choice?.finish_reason };
+  const usage = {
+    input: data.usage?.prompt_tokens,
+    output: data.usage?.completion_tokens,
+    cached: data.usage?.prompt_tokens_details?.cached_tokens ?? 0,
+  };
+  return { content: choice?.message?.content ?? undefined, finishReason: choice?.finish_reason, usage };
 }
 
 // Asks each available model in order until one gives a usable answer. Throws only when every model errored.
@@ -138,9 +149,10 @@ export async function askJson<T>(
   for (const target of targets) {
     const model = keyOf(target);
     try {
-      const result = read(await callModel(target, system, user, schema));
+      const answer = await callModel(target, system, user, schema);
+      const result = read(answer);
       if (result.ok) {
-        log.info({ messageId: ctx.messageId, model }, "AI answered");
+        log.info({ messageId: ctx.messageId, model, tokens: answer.usage }, "AI answered");
         return result;
       }
       unusable = result.unusable;

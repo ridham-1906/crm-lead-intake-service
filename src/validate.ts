@@ -1,7 +1,12 @@
 import { z } from "zod";
 import type { LeadPayload, Reference } from "./crm.js";
+import { isOurDomain } from "./thread.js";
 
-export type ValidateResult = { ok: true; payload: LeadPayload } | { ok: false; reason: string };
+// unknownServices were dropped from the payload; the caller may refresh the CRM lists and validate again.
+export type ValidateResult = { ok: true; payload: LeadPayload; unknownServices: string[] } | { ok: false; reason: string };
+
+// ourDomains/ourAddresses include what the thread itself showed to be ours (see threadHints).
+export type ValidateOptions = { ourDomains?: string[]; ourPhones?: string[]; ourAddresses?: string[]; stem?: string };
 
 // The CRM refuses unknown keys, so the payload shape is checked strictly.
 const PayloadShape = z.strictObject({
@@ -57,12 +62,13 @@ function checkMobile(raw: string, aiCode: string | undefined, mailText: string):
 }
 
 // Checks the AI's payload against the mail text and the CRM's own lists; returns a normalized copy.
-// internalEmails: our own addresses (intake mailbox, senders), whose domains never count as client contacts.
+// A bad email or mobile is dropped (and noted) when the other contact is valid; only no valid contact at all is a review.
 export function validate(
   input: LeadPayload,
   reference: Reference,
   mailText: string,
   internalEmails: string[] = [],
+  options: ValidateOptions = {},
 ): ValidateResult {
   const shape = PayloadShape.safeParse(input);
   if (!shape.success) return { ok: false, reason: `Unexpected payload fields: ${shape.error.issues[0]?.message}` };
@@ -72,23 +78,38 @@ export function validate(
   if (!payload.email && !payload.mobile) return { ok: false, reason: "No client email or mobile in the mail" };
 
   const text = mailText.toLowerCase();
+  const ourDomains = options.ourDomains ?? [];
   const internalDomains = new Set([...reference.users.map((u) => u.email), ...internalEmails].map((e) => e.split("@")[1]));
+  const ourAddresses = new Set(options.ourAddresses ?? []);
+  const isInternal = (domain: string) => internalDomains.has(domain) || isOurDomain(domain, ourDomains, options.stem);
+  const ourPhones = new Set(options.ourPhones ?? []);
+  const dropped: string[] = [];
 
   if (payload.email) {
     const email = payload.email.trim().toLowerCase();
-    if (!text.includes(email)) return { ok: false, reason: `Email ${email} does not appear in the mail` };
-    if (internalDomains.has(email.split("@")[1])) {
-      return { ok: false, reason: `Email ${email} is an internal address, not the client's` };
-    }
-    payload.email = email;
+    const domain = email.split("@")[1] ?? "";
+    if (!text.includes(email)) dropped.push(`email ${email} does not appear in the mail`);
+    else if (isInternal(domain) || ourAddresses.has(email)) dropped.push(`email ${email} is one of our own addresses`);
+    else payload.email = email;
+    if (dropped.length) delete payload.email;
   }
 
   if (payload.mobile) {
     const checked = checkMobile(payload.mobile, payload.mobileCountryCode, mailText);
-    if (typeof checked === "string") return { ok: false, reason: checked };
-    payload.mobile = checked.mobile;
-    payload.mobileCountryCode = checked.code;
+    const failure =
+      typeof checked === "string" ? checked : ourPhones.has(checked.mobile.slice(-10)) ? `Mobile ${payload.mobile} is one of our own numbers` : undefined;
+    if (failure || typeof checked === "string") {
+      dropped.push(failure ?? "mobile could not be checked");
+      delete payload.mobile;
+      delete payload.mobileCountryCode;
+    } else {
+      payload.mobile = checked.mobile;
+      payload.mobileCountryCode = checked.code;
+    }
   }
+
+  if (!payload.email && !payload.mobile) return { ok: false, reason: dropped.join("; ") || "No client email or mobile in the mail" };
+  if (dropped.length) payload.notes = [payload.notes, `Not used: ${dropped.join("; ")}.`].filter(Boolean).join("\n");
 
   if (!payload.salesPersonEmails.length) return { ok: false, reason: "No salesperson named to handle the lead" };
   const users = new Map(reference.users.map((u) => [u.email.toLowerCase(), u.email]));
@@ -100,16 +121,21 @@ export function validate(
   }
   payload.salesPersonEmails = salesPersonEmails;
 
+  const unknownServices: string[] = [];
   if (payload.services) {
     const services = new Map(reference.services.map((s) => [s.toLowerCase(), s]));
     const canonical: string[] = [];
     for (const raw of payload.services) {
       const name = services.get(raw.trim().toLowerCase());
-      if (!name) return { ok: false, reason: `Unknown service: ${raw}` };
-      if (!canonical.includes(name)) canonical.push(name);
+      if (!name) unknownServices.push(raw);
+      else if (!canonical.includes(name)) canonical.push(name);
     }
-    payload.services = canonical;
+    if (canonical.length) payload.services = canonical;
+    else delete payload.services;
+    if (unknownServices.length) {
+      payload.notes = [payload.notes, `Services not in the CRM list: ${unknownServices.join(", ")}.`].filter(Boolean).join("\n");
+    }
   }
 
-  return { ok: true, payload };
+  return { ok: true, payload, unknownServices };
 }

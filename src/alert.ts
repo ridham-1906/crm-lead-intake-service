@@ -14,9 +14,19 @@ export type AlertDetails = {
 };
 
 const lastSent = new Map<string, { at: number; suppressed: number }>();
+let muted = false;
+
+// For local scripts (dry-run, try-examples): alerts are printed instead of emailed.
+export function muteAlerts(): void {
+  muted = true;
+}
 
 // Emails ALERT_EMAIL about a failure; the same stage + error is sent at most once per ALERT_THROTTLE_MINUTES.
 export async function alert(details: AlertDetails): Promise<void> {
+  if (muted) {
+    console.log(`[alert muted] ${details.stage}: ${details.summary}${details.error ? ` (${errInfo(details.error).message})` : ""}`);
+    return;
+  }
   const env = getEnv();
   const err = details.error === undefined ? undefined : errInfo(details.error);
   const key = `${details.stage}|${details.summary}|${err?.message ?? ""}`.slice(0, 500);

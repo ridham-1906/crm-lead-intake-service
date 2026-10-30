@@ -33,12 +33,33 @@ describe("validate", () => {
         services: ["Radio"],
         salesPersonEmails: ["priya@excellentpublicity.com"],
       },
+      unknownServices: [],
     });
   });
 
-  it("rejects an email not in the mail", () => {
+  it("drops an email not in the mail when the mobile is valid, and notes it", () => {
     const result = validate({ ...good, email: "anita@sunrisefoods.com" }, reference, mailText);
+    expect(result).toMatchObject({ ok: true, payload: { mobile: "9876543210", notes: expect.stringContaining("does not appear") } });
+    expect(result.ok && result.payload.email).toBeUndefined();
+  });
+
+  it("sends to review when the only contact is invalid", () => {
+    const result = validate({ ...good, email: "anita@sunrisefoods.com", mobile: undefined }, reference, mailText);
     expect(result).toMatchObject({ ok: false, reason: expect.stringContaining("does not appear") });
+  });
+
+  it("drops our own phone number but keeps the lead on its email", () => {
+    const text = `${mailText}\nPratham | Excellent Publicity +91 98989 46420`;
+    const result = validate({ ...good, mobile: "9898946420" }, reference, text, [], { ourPhones: ["9898946420"] });
+    expect(result).toMatchObject({ ok: true, payload: { email: "anita.rao@sunrisefoods.in", notes: expect.stringContaining("our own numbers") } });
+    expect(result.ok && result.payload.mobile).toBeUndefined();
+  });
+
+  it("treats look-alike outreach domains as ours", () => {
+    const text = `${mailText}\npratham@excellentpublicityooh.com`;
+    const result = validate({ ...good, email: "pratham@excellentpublicityooh.com" }, reference, text, [], { stem: "excellentpublicity" });
+    expect(result).toMatchObject({ ok: true, payload: { notes: expect.stringContaining("our own addresses") } });
+    expect(result.ok && result.payload.email).toBeUndefined();
   });
 
   it("rejects a mobile not in the mail", () => {
@@ -46,10 +67,10 @@ describe("validate", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("rejects an internal email as the client contact", () => {
+  it("never uses an internal email as the only client contact", () => {
     const text = `${mailText}\npriya@excellentpublicity.com`;
-    const result = validate({ ...good, email: "priya@excellentpublicity.com" }, reference, text);
-    expect(result).toMatchObject({ ok: false, reason: expect.stringContaining("internal") });
+    const result = validate({ ...good, email: "priya@excellentpublicity.com", mobile: undefined }, reference, text);
+    expect(result).toMatchObject({ ok: false, reason: expect.stringContaining("our own addresses") });
   });
 
   it("requires a contact", () => {
@@ -57,10 +78,14 @@ describe("validate", () => {
     expect(result).toMatchObject({ ok: false, reason: "No client email or mobile in the mail" });
   });
 
-  it("rejects unknown salespeople and services", () => {
+  it("rejects unknown salespeople", () => {
     expect(validate({ ...good, salesPersonEmails: ["x@excellentpublicity.com"] }, reference, mailText).ok).toBe(false);
     expect(validate({ ...good, salesPersonEmails: [] }, reference, mailText).ok).toBe(false);
-    expect(validate({ ...good, services: ["TV"] }, reference, mailText).ok).toBe(false);
+  });
+
+  it("moves unknown services to notes instead of bouncing the lead", () => {
+    const result = validate({ ...good, services: ["TV", "radio"] }, reference, mailText);
+    expect(result).toMatchObject({ ok: true, unknownServices: ["TV"], payload: { services: ["Radio"], notes: expect.stringContaining("TV") } });
   });
 
   it("rejects unknown keys", () => {

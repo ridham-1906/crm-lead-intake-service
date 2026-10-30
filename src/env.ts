@@ -40,6 +40,8 @@ const schema = z.object({
   CRM_URL: z.url().transform((u) => u.replace(/\/+$/, "")),
   LEAD_IMPORT_API_KEY: z.string().min(1),
 
+  // Optional extra domains that are always ours; most are learned per thread (see threadHints).
+  INTERNAL_DOMAINS: optionalList,
   ALLOWED_SENDERS: emailList,
   LEAD_GENERATOR_EMAIL: email,
 

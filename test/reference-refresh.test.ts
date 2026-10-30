@@ -27,6 +27,7 @@ const aiAnswer = (salesPersonEmails: string[], services: string[]) =>
         message: {
           content: JSON.stringify({
             decision: "create",
+            reviewCode: null,
             reason: null,
             lead: {
               companyName: "Sunrise Foods Pvt Ltd", email: null, mobile: "9876543210", mobileCountryCode: "+91",

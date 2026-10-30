@@ -10,10 +10,15 @@ Per message (`src/process.ts`): fetch + parse → skip if already outcome-labell
 
 ## AI (Groq first, then OpenRouter)
 
+- System prompt is the editable file `prompts/system.md` (`{{COMPANY_NAME}}` placeholder), read once per process; restart after editing. It is a field guide written from real SmartLead reply threads: who is who, where each field is, what to ignore (our pitch prices, cross-sell lists, our phones, Meet dial-ins), a services vocabulary, and when review is allowed.
+- Before the AI: `src/thread.ts` cleans the thread (quote markers, link fragments, our boilerplate, disclaimers, every repeated paragraph; head+tail fit to 14k chars) and computes `<hints>`: outside participants ranked, company guess from domain, our phone numbers, other phone lines. Who is ours is decided per thread: `splitMessages` cuts the thread at From:/"On … wrote:" headers and each author is ours if their domain is known (CRM users, sender, intake, optional `INTERNAL_DOMAINS`), contains the `COMPANY_NAME` stem, or their own message has our signature line/image, footer, or ≥2 sales-pitch phrases. Their domain is then ours for the thread and all phones in our messages are ours.
+- Review is allowed only for `reviewCode` multiple_companies / not_a_lead, or no contact at all; any other AI "review" becomes a create checked by code. If every model returns unusable output, `fallbackLead` builds a minimal lead from hints.
+
 - `src/ai.ts` owns providers and model switching; `src/extract.ts` owns the prompt, schema and answer parsing. Both providers via plain fetch to OpenAI-compatible chat completions.
 - Order per call: all `GROQ_MODELS`, then all `OPENROUTER_MODELS`; `AI_ROTATION` (`round-robin` / `fallback`) rotates within each provider. Models in cooldown are skipped. Either provider may be unset; at least one must be configured.
 - API error → model cooled down (`Retry-After` / `x-ratelimit-reset` / `AI_COOLDOWN_SECONDS`), try next. Unusable output → try next, no cooldown. All unusable → review. All errored/cooling → `AiUnavailableError` (mail retried, alert sent). Non-429 single-model errors alert.
 - Asks for strict `json_schema` (OpenRouter strict, Groq best-effort). A 400 rejecting json_schema switches that model to `json_object` + schema in prompt (remembered in memory). Replies are parsed by taking the outermost JSON object after stripping `<think>` blocks, then zod-validated.
+- Prompt order is cache-friendly: system prompt, then `<services>`, then per-mail parts (assignees/users, hints, mail). `AI answered` logs `tokens {input, output, cached}`. Measured: Groq qwen3.8-27b and gpt-oss-120b returned cached=0.
 - OpenRouter-only extras: `provider.require_parameters`, `X-Title`. Free tiers may log prompts (client PII); OpenRouter's free daily cap is per account.
 
 ## Rules that hold everywhere
@@ -23,6 +28,7 @@ Per message (`src/process.ts`): fetch + parse → skip if already outcome-labell
 - Alerts (`src/alert.ts`) go to `ALERT_EMAIL` via the intake mailbox, throttled per stage+error for `ALERT_THROTTLE_MINUTES`. Single-model 429s don't alert; other single-model errors do.
 - Assignment: salespeople = To: recipients who are CRM users, minus sender, `INTAKE_MAILBOX` and `LEAD_GENERATOR_EMAIL` (`recipientAssignees`, in code). They are given to the AI as `<assignees>` and override its pick. If none, the AI maps owners named in the text. Cc never assigns.
 - Reference cache refresh (`draftLead`): a To: address on one of our domains that the cached users list lacks (`unknownColleagues`) forces a fresh fetch before the AI call; an `Unknown salesperson/service` validation failure forces one fresh fetch and a re-check without a second AI call; a CRM 400 about salesperson/service/lead access clears the cache (`invalidateReference`). A copy fetched under 2 s ago is never re-fetched.
+- Contacts: a bad/our-own email or mobile is dropped and noted when the other contact is valid; only no valid contact is a review. Unknown services trigger one reference refresh, then move to notes instead of bouncing.
 - Mobiles: any country. Dial code taken from the `+code` written before the number in the mail, else the AI's, else +91; +91 numbers must be 10 digits starting 6-9, others must fit E.164 (≤ 15 digits).
 - Startup (`src/server.ts`) runs named steps (environment → Gmail sign-in → labels → HTTP listen), printing `startup: <step> ok` to the console only (not Loki, no config values); any failure logs `startup failed at "<step>"` with a `hint` and exits 1. CRM reference and Gmail watch are non-fatal checks. `getEnv()` throws `EnvError` with separate `missing` / `invalid` lists (never values). Final `ep-lead-intake started on port …` console line has no config values.
 - Boot asserts the Gmail token's account equals `INTAKE_MAILBOX`. `COMPANY_NAME` feeds the prompt. The intake mailbox and allowed senders' domains are treated as internal in validation.
@@ -38,7 +44,7 @@ Per message (`src/process.ts`): fetch + parse → skip if already outcome-labell
 
 ## Commands
 
-`npm run build` · `npm start` · `npm test` · `npx tsc --noEmit` · `npx eslint .` · `npm run dry-run -- <id>` · `npm run authorize`
+`npm run build` · `npm start` · `npm test` · `npx tsc --noEmit` · `npx eslint .` · `npm run dry-run -- <id>` · `npm run try-examples` (replays `examples/*.txt` DEBUG_DUMP files through the real AI and checks `examples/expected.json`; no CRM, mail or alerts) · `npm run authorize`
 
 ## Known issues / open points
 
