@@ -1,6 +1,7 @@
 import type { gmail_v1 } from "googleapis";
 
-export const BODY_LIMIT = 20_000;
+// Raw cap only; the AI sees the cleaned thread, trimmed to PROMPT_BODY_LIMIT in thread.ts.
+export const BODY_LIMIT = 100_000;
 
 export type Mail = {
   id: string;
@@ -191,10 +192,6 @@ export function buildRawMail(m: OutgoingMail): string {
     raw = [...headers, textPart, ""].join("\r\n");
   }
   return Buffer.from(raw, "utf8").toString("base64url");
-}
-
-export function replySubject(subject: string): string {
-  return /^re:/i.test(subject) ? subject : `Re: ${subject}`;
 }
 
 export function forwardSubject(subject: string): string {

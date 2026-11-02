@@ -41,11 +41,7 @@ You can reach me at +91 98765 43210.
 Anita Rao, Marketing Manager
 ```
 
-Within a few seconds the sender gets a reply in the same thread:
-
-> Lead #812 created for Sunrise Foods Pvt Ltd, assigned to Priya Shah.
-
-The lead created in the CRM:
+Within a few seconds the lead is created in the CRM, and the mail gets the `CRM-Done` label. The service sends no confirmation mail; the CRM notifies the assigned salespeople itself. The lead created:
 
 ```json
 {
@@ -57,7 +53,7 @@ The lead created in the CRM:
   "city": "Pune",
   "budget": "5 lakhs",
   "notes": "Radio campaign across Maharashtra, first two weeks of November (Diwali).",
-  "source": "Email inquiry",
+  "source": "Email marketing",
   "services": ["Radio"],
   "salesPersonEmails": ["priya@excellentpublicity.com"]
 }
@@ -69,16 +65,15 @@ The CRM notifies Priya through the bell and by email.
 
 | Do | Why |
 |---|---|
-| Name the owner: "Priya to handle", "@Ravi", or Cc them | A lead without an owner is sent to review |
+| Put the salespeople who should own the lead in **To:** | Every To: recipient who is a CRM user is assigned (the sender, the intake mailbox and the lead generator are skipped). Cc never assigns |
+| If nobody suitable is in To:, name the owner in the text: "Priya to handle", "@Ravi" | The AI maps the name to a CRM user; without any owner the mail goes to review |
 | Use a name that matches only one CRM user (use the full name if two share a first name) | Ambiguous names are sent to review |
 | Make sure the client's email or phone number is in the mail | The service never guesses contact details |
 | Send one client per mail | A mail about several companies is sent to review |
 
-When something is missing, the sender gets a reply such as:
+When something is missing, the lead generator (`LEAD_GENERATOR_EMAIL`) receives the original mail with the reason and the AI's draft at the top, and adds the lead by hand. Nothing is ever dropped silently.
 
-> Couldn't create this lead automatically (No salesperson named to handle the lead). Forwarded to leadgen@excellentpublicity.com to add by hand.
-
-The lead generator receives the original mail with the reason and the AI's draft at the top. Nothing is ever dropped silently.
+The service sends mail in exactly two cases: this review forward, and error alerts to `ALERT_EMAIL` (§7). It never replies to the sender.
 
 ---
 
@@ -98,12 +93,14 @@ Each mail ends with one Gmail label. The labels are the record of what happened;
 
 | Label | Meaning | Who is told |
 |---|---|---|
-| `CRM-Done` | Lead created | Sender gets "Lead #N created …" |
-| `CRM-Review` | Lead not created (missing details, ambiguous owner, duplicate lead, CRM refused it) | Lead generator gets the forward; sender gets "Couldn't create …" |
+| `CRM-Done` | Lead created | Nobody by this service; the CRM notifies the assigned salespeople |
+| `CRM-Review` | Lead not created (missing details, ambiguous owner, duplicate lead, CRM refused it) | Lead generator gets the forward with the reason |
 | `CRM-Ignored` | Sender isn't allowed, or the mail failed authentication (DMARC/SPF/DKIM) | Nobody |
 | *(no label yet)* | Not processed yet, or failed on our side (AI down, CRM down) and waiting for a retry | `ALERT_EMAIL`, if it's an error |
 
 To have a mail processed again, remove its `CRM-…` label in Gmail. The next sweep picks it up.
+
+**New CRM users and services.** The CRM's user and service lists are cached for 5 minutes. A salesperson or service added in the CRM inside that window still works: when a mail mentions one the cached list doesn't know, the service fetches the lists again before deciding. Only if the fresh lists don't have it either does the mail go to review.
 
 **Checks the AI can't bypass.** Whatever the AI returns, the code refuses the lead unless:
 - the client email or phone number literally appears in the mail;
@@ -154,17 +151,19 @@ All variables are in [example.env](../example.env), with comments.
 | `GMAIL_PUBSUB_TOPIC` | ✓ | | `projects/<project>/topics/<topic>` |
 | `PUBSUB_AUDIENCE` | ✓ | | Push endpoint URL |
 | `PUBSUB_SERVICE_ACCOUNT` | ✓ | | Push subscription's service account email |
-| `GROQ_API_KEY`, `GROQ_MODELS` | one provider ✓ | | Groq key and comma-separated model ids; tried first |
-| `OPENROUTER_API_KEY`, `OPENROUTER_MODELS` | one provider ✓ | | OpenRouter key and model ids; used when Groq is exhausted |
+| `GROQ_API_KEY`, `GROQ_MODELS` | one provider ✓ | | Groq key(s) and comma-separated model ids; tried first. Several keys (different accounts) are comma-separated |
+| `OPENROUTER_API_KEY`, `OPENROUTER_MODELS` | one provider ✓ | | OpenRouter key(s) and model ids; used when Groq is exhausted. Several keys are comma-separated |
 | `AI_ROTATION` | | `round-robin` | `round-robin` or `fallback` (§5) |
 | `AI_COOLDOWN_SECONDS` | | `60` | How long a failed model is skipped |
 | `CRM_URL`, `LEAD_IMPORT_API_KEY` | ✓ | | CRM address and import key |
+| `INTERNAL_DOMAINS` | | | Optional. Extra domains that are always ours. Usually left empty: see §5, "Who is us" |
 | `ALLOWED_SENDERS` | ✓ | | Comma-separated senders allowed to submit inquiries |
 | `LEAD_GENERATOR_EMAIL` | ✓ | | Receives mail that needs a human |
 | `ALERT_EMAIL` | ✓ | | Comma-separated addresses for error alerts |
 | `ALERT_THROTTLE_MINUTES` | | `60` | Minimum gap between two alerts for the same error |
 | `SWEEP_INTERVAL_MINUTES` | | `10` | How often the mailbox is searched for unprocessed mail |
 | `DRY_RUN` | | `false` | `true`: no CRM call, labels, replies or forwards |
+| `DEBUG_DUMP` | | `false` | `true`: prints each Pub/Sub push to the console and writes each fetched mail to `<temp>/ep-lead-intake/<gmail-id>.txt` (§8) |
 
 ---
 
@@ -172,12 +171,31 @@ All variables are in [example.env](../example.env), with comments.
 
 The AI only reads the mail and drafts the lead. It can't create anything on its own, and every draft goes through the code checks in §2.
 
+**The prompt is a file.** The AI's instructions are in [prompts/system.md](../prompts/system.md). It describes how a SmartLead reply thread looks, who is the client and who is us, where each field is found, what to ignore (our pitch prices, the cross-sell list, our phone numbers, Meet dial-ins), a services vocabulary (railway → Transit, cricket → Sports Marketing, …) and the only reasons a mail may go to review. Edit it as you learn, then restart the service. `{{COMPANY_NAME}}` is filled in from the env.
+
+**What the code does before and after the AI**, so every model gets the same help:
+- **Before:** it removes duplicates and noise from the thread (repeated pitches, signatures, disclaimers, link fragments, dial-ins), usually halving it. It also adds a `<hints>` block: the outside participants (the likely client), a company guess from their domain, our phone numbers, and the client's phone lines with their labels.
+- **After:** the AI may only send a mail to review when there is no client contact at all, the thread is about several companies, or the client clearly declined. A missing mobile, service, budget or city never causes a review. If an email or mobile fails the checks but the other one is fine, the bad one is dropped and noted. Unknown services go to notes. If every model returns unusable output, a minimal lead is built from the hints, with a note to complete it.
+
+**Who is us, without a domain list.** The outreach team writes from many, changing domains, so nothing has to be listed. The code splits each thread into its messages and decides who wrote each one. An author counts as ours when:
+- their domain is already known: a CRM user's domain, the sender's, or the intake mailbox's;
+- their domain contains the company name (`excellentpublicityooh.com`, `…connect.com`, `…ind.in`, …); or
+- their own message carries our signature line ("Excellent Publicity"), our footer ("Feel free to contact us…", "Member of BNI"), our signature image, or reads like our sales pitch.
+
+Their domain is then treated as ours for that thread, and every phone number in their messages counts as ours. Anyone else who wrote in the thread is a client candidate. If one domain is ever misjudged, add it to `INTERNAL_DOMAINS`.
+
+**Prompt caching.** The system prompt and the services list are identical for every mail and come first in each request, so a provider that caches prompts can reuse them (on Groq, cached input is 50% cheaper and doesn't count toward the per-minute limit). Nothing has to be switched on; check `tokens.cached` in the `AI answered` log line. In testing, Groq's `qwen/qwen3.8-27b` and `openai/gpt-oss-120b` served nothing from cache.
+
+**Testing prompt changes:** save DEBUG_DUMP files of real threads in `examples/`, add the expected result to `examples/expected.json`, and run `npm run try-examples`. It replays every thread through the real AI and the checks, and prints PASS/FAIL per thread. It doesn't call the CRM, send mail or send alerts.
+
 **Two providers, Groq first.** The service uses Groq and OpenRouter, both through the same OpenAI-style chat API (no SDK). For each mail it tries:
 
 1. every Groq model in `GROQ_MODELS`;
 2. if all of them are rate-limited or failing, every OpenRouter model in `OPENROUTER_MODELS`.
 
 Either provider can be left out by leaving its `…_MODELS` empty, but at least one must be set.
+
+**Several accounts.** `GROQ_API_KEY` and `OPENROUTER_API_KEY` each accept several keys, comma-separated, from different accounts. Free limits are per account, so each extra key adds a full extra quota. Every model is tried on each key before the next model (model A on key 1, model A on key 2, then model B …), and a rate-limited key is skipped only for that model. In `round-robin` mode each mail also starts on the next key. Logs and alerts name an account by position (`groq:model` is the first key, `groq#2:model` the second); they never show the key.
 
 **Choosing models.**
 - **Groq:** pick ids from [console.groq.com/docs/models](https://console.groq.com/docs/models), for example a Qwen model.
@@ -198,7 +216,7 @@ curl -s https://openrouter.ai/api/v1/models   | jq -r '.data[] | select(.id|ends
 | `round-robin` (default) | Mail 1 starts with Groq model A, mail 2 with Groq model B, … | Remaining Groq models, then OpenRouter models |
 | `fallback` | Always Groq model A | Groq B, C, …, then OpenRouter models |
 
-A model that returns an error is skipped for `AI_COOLDOWN_SECONDS` (or for as long as the provider's `Retry-After` header says). A model that returns unusable output (not JSON, wrong format) isn't benched, but the next model is tried. If every model returns unusable output, the mail goes to review. If every model errors or is benched, the mail stays queued for the next sweep and an alert is sent.
+A model (on one key) that returns an error is skipped for `AI_COOLDOWN_SECONDS` (or for as long as the provider's `Retry-After` header says). A model that returns unusable output (not JSON, wrong format) isn't benched, but the next model is tried. If every model returns unusable output, the mail goes to review. If every model errors or is benched, the mail stays queued for the next sweep and an alert is sent.
 
 **Free-tier limits** (approximate; providers change them often):
 - **Groq:** per model and per account; roughly 30 requests per minute and about 1,000 per day for larger models. Check the limits page in the Groq console.
@@ -260,6 +278,7 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 ## 8. Going live
 
 1. **Try single mails.** With `.env` filled in locally, run `npm run dry-run -- <gmail-message-id>`. The id is the last part of the Gmail URL when the mail is open. This prints the draft and the checks, and sends nothing. Do this for 10–20 real inquiries. If drafts are wrong, adjust the prompt in `src/extract.ts`.
+   To see exactly what arrives, set `DEBUG_DUMP=true` locally. Each Pub/Sub push prints to the console with its decoded `{ emailAddress, historyId }`. Each fetched mail gets a file in your temp folder (on Windows `%TEMP%ep-lead-intake<gmail-id>.txt`), with the parsed headers and body, the sender check, the exact AI input, the AI result and the validation. The console prints the file path. These files contain client data, so keep `DEBUG_DUMP=false` in production.
 2. **Dry run in production.** Deploy with `DRY_RUN=true` for a few days. Compare the `dry run: lead not created` and `mail sent to review` log lines with what the lead generator entered by hand.
 3. **Switch on.** Set `DRY_RUN=false`. Mail that arrived during the dry run has no labels, so the first sweep processes it for real.
 
@@ -270,7 +289,8 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Startup fails with "GMAIL_REFRESH_TOKEN is for x, but INTAKE_MAILBOX is y" | Token created in the wrong Google account | Run `npm run authorize` again, signed in as `INTAKE_MAILBOX` |
-| Startup fails with "Invalid environment" | Missing or malformed variable | The log lists each one; compare with `example.env` |
+| Startup fails with "Environment is not valid" | Missing or malformed variable | The log lists each one under `missing` and `invalid`; compare with `example.env` |
+| Startup fails at "gmail sign-in as INTAKE_MAILBOX" with `invalid_grant` | Refresh token belongs to a different OAuth client, or was revoked | Run `npm run authorize` again signed in as `INTAKE_MAILBOX` |
 | Every mail is labelled `CRM-Ignored` | Sender not in `ALLOWED_SENDERS`, or internal mail arriving without Gmail authentication results | Check the log reason. If it's "sender failed DMARC/SPF+DKIM" for internal mail, look at the mail's original headers and raise it with the developer |
 | Nothing happens when mail arrives | Gmail filter didn't add `Lead-Intake`, or the Pub/Sub push isn't reaching the service | Check the label is on the mail; check the subscription's delivery errors. Sweeps still catch mail within `SWEEP_INTERVAL_MINUTES` |
 | Push requests get `401` | `PUBSUB_AUDIENCE` or `PUBSUB_SERVICE_ACCOUNT` doesn't match the subscription | Make them identical to the subscription's settings |
@@ -285,13 +305,18 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 
 Logs go to the same Grafana Loki stack as ep-crm, under their own `app` label. Set `LOKI_URL`, `LOKI_USERNAME` and `LOKI_PASSWORD` to the same values ep-crm uses. With `LOKI_URL` empty, logs go to stdout only; a wrong URL or token never stops the service. Logs always go to stdout as well.
 
+Routine start-up and shutdown progress (`starting`, `startup: <step> ok`, `started on port …`, `gmail watch renewed`, `shutting down`) is printed to the console only and never sent to Loki; it contains no configuration values.
+
 Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `level`. Pino's `warn` appears in Loki as `warning`, and `fatal` as `critical`. Everything else is in the JSON line. Filter on the `level` label, never on the parsed field.
 
 | `msg` | Level | When |
 |---|---|---|
-| `ep-lead-intake listening` | info | Startup finished |
+| `startup: crm reference failed; continuing` | warning | CRM not reachable at startup; the service still starts and retries per mail (`hint` says what to fix) |
+| `startup failed: Environment is not valid (…)` | critical | Variables missing or malformed; lists them in `missing` / `invalid`; the service exits |
+| `startup failed at "<step>": …` | critical | A startup step failed; `hint` says how to fix it; the service exits and an alert is attempted |
 | `mail queued` | info | Mail added to the queue |
-| `AI answered` | info | Which model drafted a mail (`groq:…` or `openrouter:…`) |
+| `crm reference refreshed` | info | The cached CRM users/services list missed someone (a new colleague in To:, or an unknown salesperson/service), so it was fetched again |
+| `AI answered` | info | Which model drafted a mail (`groq:…` or `openrouter:…`), with `tokens` `{ input, output, cached }`; `cached` > 0 means the provider served part of the prompt from its cache |
 | `AI answer unusable; trying next` | warning | A model's reply wasn't valid lead JSON |
 | `model rejected json_schema; using json_object` | warning | A model doesn't support strict JSON schema |
 | `lead created` | info | Lead created (`leadId`, `messageId`) |
@@ -303,7 +328,7 @@ Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `lev
 | `alert sent` / `alert email failed` | info / error | Alert email outcome |
 | `gmail search failed` / `gmail watch failed` | error | Gmail problems |
 | `unhandled rejection` | error | Stray promise rejection |
-| `uncaught exception` / `boot failed` | critical | Crash; the process exits and Railway restarts it |
+| `uncaught exception` | critical | Crash; the process exits and Railway restarts it |
 
 ```logql
 {app="ep-lead-intake", level="error"}                                # everything broken

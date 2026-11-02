@@ -2,7 +2,7 @@
 
 Turns inquiry emails sent to a configurable mailbox (`INTAKE_MAILBOX`) into EP CRM leads.
 
-How it works: Gmail sends a push notification and new mail joins a queue. Mails are processed one at a time. An AI model on OpenRouter drafts each lead, with several models rotated. Code checks every draft against the mail and the CRM's own lists, then creates the lead and replies to the sender. Anything that can't become a valid lead is forwarded to the lead generator. Failures are emailed to `ALERT_EMAIL`.
+How it works: Gmail sends a push notification and new mail joins a queue. Mails are processed one at a time. An AI model (Groq first, then OpenRouter) drafts each lead. Code checks every draft against the mail and the CRM's own lists, then creates the lead; the CRM notifies the assigned salespeople. Anything that can't become a valid lead is forwarded to the lead generator. Failures are emailed to `ALERT_EMAIL`.
 
 **Full usage, setup and configuration guide: [docs/SPEC.md](docs/SPEC.md).** Every environment variable is listed with comments in [example.env](example.env).
 

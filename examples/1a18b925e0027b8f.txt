@@ -1,0 +1,448 @@
+===== Mail received (2026-10-30T06:49:52.208Z) =====
+Gmail id:   1a18b925e0027b8f  (thread 1a18b925e0027b8f)
+Labels:     UNREAD, INBOX, Label_1222915040592129127
+From:       Man Navlakha <man@excellentpublicity.com>
+To:         huzef@excellentpublicity.com
+Cc:         vaishal@growwithexcellentpublicity.com
+Subject:    Fwd: FW: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+Date:       Fri, 30 Oct 2026 12:19:34 +0530
+Auth:       mx.google.com;       dkim=pass header.i=@excellentpublicity.com header.s=google header.b=QEBM1NQ0;       arc=pass (i=1);       spf=pass (google.com: domain of man@excellentpublicity.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=man@excellentpublicity.com;       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=excellentpublicity.com;       dara=neutral header.i=@growwithexcellentpublicity.com
+Body chars: 4325
+
+Feel free to contact us in case of any query.
+
+Thanking you,
+With best regards,
+[image: Atlas by Excellent Publicity]
+<https://atlas.excellentpublicity.com/>
+[image: Man Navlakha - Excellent Publicity]
+
+
+---------- Forwarded message ---------
+From: <vaishal@excellentpublicity.com>
+Date: Sun, Oct 25, 2026 at 6:36 PM
+Subject: FW: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+To: Mohit Bhandari <mohit.bhandari@excellentpublicity.com>, Abhishek Sonar <
+abhishek.sonar@excellentpublicity.com>, Karan Sharma <
+karan.sharma@excellentpublicity.com>, Shivani Kilawat <
+shivani@excellentpublicity.com>
+Cc: <akash@excellentpublicity.com>, <manan@excellentpublicity.com>, Man
+Navlakha <man@excellentpublicity.com>
+
+
+Pod Mohit
+
+
+
+PFB
+
+
+
+daya@venusrentacar.com
+
+
+
+*------------------------------------------------------------------------------------------------------*
+
+*A thousand people have every great idea. One becomes successful. *
+
+The difference comes down to *execution* that takes years of *irrational
+persistence*.
+
+*------------------------------------------------------------------------------------------------------*
+
+*------------------------------------------------------------------------------------------------------*
+
+*Thanking you,*
+
+*With best regards,*
+
+
+
+
+
+Disclaimer: The information in this message is confidential and may be
+legally privileged. It is intended solely for the addressee/recipient.
+Access to this message by any one else is unauthorized. If you are not the
+intended addressee/recipient any disclosure, copying or distribution of the
+message, or any action or omission taken by you by relying on it is
+prohibited and may be unlawful. Please notify the addressor/sender
+immediately if you have received this message in error. The organization is
+not responsible for any damage caused by a virus or an alteration of the
+e-mail by a third party or otherwise. The contents of this message may not
+necessarily represent the views or the policies of the organization.
+
+
+
+*From:* Pratham Agrawal <pratham@thecreativewonder.com>
+*Sent:* 25 October 2026 18:30
+*To:* inquiry@excellentpublicity.com
+*Subject:* Re: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+
+
+
+---------- Forwarded message ---------
+From: *Daya Shankar* <daya@venusrentacar.com>
+Date: Sat, Oct 24, 2026 at 06:48 pm
+Subject: Re: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+To: <pratham@thecreativewonder.com>
+
+
+Hi,
+
+Sure, will let you know on Monday.
+
+
+
+Regards,
+
+Arulya Shankar Singh
+
+Director — Venus Rent A Car
+
+Sent from my iPhone
+
+
+
+
+
+On 24 Oct 2026, at 3:41 PM, Pratham Agrawal <pratham@thecreativewonder.com>
+wrote:
+
+﻿ Hi Daya,
+
+A limited opportunity has opened up for Venus Rent a Car in IndiGo's
+inflight magazine, especially on high-visibility pages.
+
+This can be one of the strongest channels to reach business travellers,
+HNIs, NRIs and international passengers.
+
+Alongside this, Venus Rent a Car can also advertise with us across:
+Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+Indian cricket association, starting from 1.5 lakh
+Celebrity association, starting from 3 lakhs
+
+If this is of interest, I can share a meeting link for a quick 10-minute
+discussion.
+
+Thanks,
+
+
+Pratham Agrawal
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+
+
+
+On Sat, Oct 24, 2026 at 10:11 AM UTC <pratham@thecreativewonder.com> wrote:
+
+Hi Daya,
+
+A limited opportunity has opened up for Venus Rent a Car in IndiGo's
+inflight magazine, especially on high-visibility pages.
+
+This can be one of the strongest channels to reach business travellers,
+HNIs, NRIs and international passengers.
+
+Alongside this, Venus Rent a Car can also advertise with us across:
+Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+Indian cricket association, starting from 1.5 lakh
+Celebrity association, starting from 3 lakhs
+
+If this is of interest, I can share a meeting link for a quick 10-minute
+discussion.
+
+Thanks,
+
+
+Pratham Agrawal
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+
+===== Sender check (2026-10-30T06:49:52.209Z) =====
+passed (allowed sender, authenticated)
+
+===== AI input (exactly what the model receives) (2026-10-30T06:49:52.211Z) =====
+<users>
+aayush.sharma <aayush.sharma@excellentpublicity.com>
+abhinav <abhinav@excellentpublicity.com>
+abhishek.sonar <abhishek.sonar@excellentpublicity.com>
+akash <akash@excellentpublicity.com>
+ami <ami@excellentpublicity.com>
+amisha <amisha@excellentpublicity.com>
+amit <amit@excellentpublicity.com>
+atish <atish@excellentpublicity.com>
+bhavinee <bhavinee@excellentpublicity.com>
+dev <dev@excellentpublicity.com>
+drashti <drashti@excellentpublicity.com>
+ekta <ekta@excellentpublicity.com>
+hemanth <hemanth@excellentpublicity.com>
+hitaksh <hitaksh@excellentpublicity.com>
+huzef <huzef@excellentpublicity.com>
+jahanvi <jahanvi@excellentpublicity.com>
+karan.sharma <karan.sharma@excellentpublicity.com>
+kaushik <kaushik@excellentpublicity.com>
+maitreyee <maitreyee@excellentpublicity.com>
+man+admin <man+admin@excellentpublicity.com>
+man <man@excellentpublicity.com>
+manan <manan@excellentpublicity.com>
+manav <manav@excellentpublicity.com>
+mayurdhwaj <mayurdhwaj@excellentpublicity.com>
+mohit.bhandari <mohit.bhandari@excellentpublicity.com>
+neer <neer@excellentpublicity.com>
+neha.chauhan <neha.chauhan@excellentpublicity.com>
+nihal <nihal@excellentpublicity.com>
+pankti <pankti@excellentpublicity.com>
+poojan.joshi <poojan.joshi@excellentpublicity.com>
+prahar <prahar@excellentpublicity.com>
+pratham <pratham@excellentpublicity.com>
+priya <priya@excellentpublicity.com>
+priyansh <priyansh@excellentpublicity.com>
+rashmi <rashmi@excellentpublicity.com>
+rhythem <rhythem@excellentpublicity.com>
+ridham+sale <ridham+sale@excellentpublicity.com>
+ridham <ridham@excellentpublicity.com>
+rudra <rudra@excellentpublicity.com>
+rudraksh <rudraksh@excellentpublicity.com>
+rutvik <rutvik@excellentpublicity.com>
+sakshi.thakkar <sakshi.thakkar@excellentpublicity.com>
+shailendra <shailendra@excellentpublicity.com>
+shivani <shivani@excellentpublicity.com>
+snehal <snehal@excellentpublicity.com>
+surbhi <surbhi@excellentpublicity.com>
+tamanna <tamanna@excellentpublicity.com>
+tanvi <tanvi@excellentpublicity.com>
+vaishal <vaishal@excellentpublicity.com>
+vidhi.dodhia <vidhi.dodhia@excellentpublicity.com>
+viral <viral@excellentpublicity.com>
+vishal.makwana <vishal.makwana@excellentpublicity.com>
+yogesh <yogesh@excellentpublicity.com>
+</users>
+<services>
+- Cinema
+- Digital
+- Digital PR
+- GTM
+- Gifting - Vouchers
+- In-app and OTT
+- Influencer Marketing
+- Performance Marketing
+- Portal
+- Programmatic Ads
+- Radio
+- SEO
+- Social Media
+- Television
+- Activation
+- Airport
+- BTL
+- Celebrity Endorsement
+- Corporate Gifting
+- Events & Sponsorships
+- Gifting - Products
+- Gifting - Tickets & Experiences
+- In-Film and Out-Film
+- Inflight
+- Magazine
+- Newspaper
+- Non Traditional
+- Offline
+- Others
+- Outdoor
+- Outdoor 1
+- Outdoor 2
+- Outdoor 3
+- Outdoor 4
+- Outdoor 5
+- Outdoor 6
+- Retail Marketing and Merchandising
+- Sports Marketing
+- Transit
+</services>
+<assignees>
+huzef@excellentpublicity.com
+</assignees>
+<mail>
+From: Man Navlakha <man@excellentpublicity.com>
+To: huzef@excellentpublicity.com
+Cc: vaishal@growwithexcellentpublicity.com
+Date: Fri, 30 Oct 2026 12:19:34 +0530
+Subject: Fwd: FW: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+
+Feel free to contact us in case of any query.
+
+Thanking you,
+With best regards,
+[image: Atlas by Excellent Publicity]
+<https://atlas.excellentpublicity.com/>
+[image: Man Navlakha - Excellent Publicity]
+
+
+---------- Forwarded message ---------
+From: <vaishal@excellentpublicity.com>
+Date: Sun, Oct 25, 2026 at 6:36 PM
+Subject: FW: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+To: Mohit Bhandari <mohit.bhandari@excellentpublicity.com>, Abhishek Sonar <
+abhishek.sonar@excellentpublicity.com>, Karan Sharma <
+karan.sharma@excellentpublicity.com>, Shivani Kilawat <
+shivani@excellentpublicity.com>
+Cc: <akash@excellentpublicity.com>, <manan@excellentpublicity.com>, Man
+Navlakha <man@excellentpublicity.com>
+
+
+Pod Mohit
+
+
+
+PFB
+
+
+
+daya@venusrentacar.com
+
+
+
+*------------------------------------------------------------------------------------------------------*
+
+*A thousand people have every great idea. One becomes successful. *
+
+The difference comes down to *execution* that takes years of *irrational
+persistence*.
+
+*------------------------------------------------------------------------------------------------------*
+
+*------------------------------------------------------------------------------------------------------*
+
+*Thanking you,*
+
+*With best regards,*
+
+
+
+
+
+Disclaimer: The information in this message is confidential and may be
+legally privileged. It is intended solely for the addressee/recipient.
+Access to this message by any one else is unauthorized. If you are not the
+intended addressee/recipient any disclosure, copying or distribution of the
+message, or any action or omission taken by you by relying on it is
+prohibited and may be unlawful. Please notify the addressor/sender
+immediately if you have received this message in error. The organization is
+not responsible for any damage caused by a virus or an alteration of the
+e-mail by a third party or otherwise. The contents of this message may not
+necessarily represent the views or the policies of the organization.
+
+
+
+*From:* Pratham Agrawal <pratham@thecreativewonder.com>
+*Sent:* 25 October 2026 18:30
+*To:* inquiry@excellentpublicity.com
+*Subject:* Re: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+
+
+
+---------- Forwarded message ---------
+From: *Daya Shankar* <daya@venusrentacar.com>
+Date: Sat, Oct 24, 2026 at 06:48 pm
+Subject: Re: Daya, IndiGo Inflight Magazine For Venus Rent a Car
+To: <pratham@thecreativewonder.com>
+
+
+Hi,
+
+Sure, will let you know on Monday.
+
+
+
+Regards,
+
+Arulya Shankar Singh
+
+Director — Venus Rent A Car
+
+Sent from my iPhone
+
+
+
+
+
+On 24 Oct 2026, at 3:41 PM, Pratham Agrawal <pratham@thecreativewonder.com>
+wrote:
+
+﻿ Hi Daya,
+
+A limited opportunity has opened up for Venus Rent a Car in IndiGo's
+inflight magazine, especially on high-visibility pages.
+
+This can be one of the strongest channels to reach business travellers,
+HNIs, NRIs and international passengers.
+
+Alongside this, Venus Rent a Car can also advertise with us across:
+Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+Indian cricket association, starting from 1.5 lakh
+Celebrity association, starting from 3 lakhs
+
+If this is of interest, I can share a meeting link for a quick 10-minute
+discussion.
+
+Thanks,
+
+
+Pratham Agrawal
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+
+
+
+On Sat, Oct 24, 2026 at 10:11 AM UTC <pratham@thecreativewonder.com> wrote:
+
+Hi Daya,
+
+A limited opportunity has opened up for Venus Rent a Car in IndiGo's
+inflight magazine, especially on high-visibility pages.
+
+This can be one of the strongest channels to reach business travellers,
+HNIs, NRIs and international passengers.
+
+Alongside this, Venus Rent a Car can also advertise with us across:
+Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+Indian cricket association, starting from 1.5 lakh
+Celebrity association, starting from 3 lakhs
+
+If this is of interest, I can share a meeting link for a quick 10-minute
+discussion.
+
+Thanks,
+
+
+Pratham Agrawal
+Excellent Publicity
++91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+Member of BNI, Corporate Connections & Offline
+</mail>
+
+===== AI result (2026-10-30T06:49:52.967Z) =====
+{
+  "ok": false,
+  "reason": "No mobile phone number for the client contact is provided in the email.",
+  "draft": {
+    "companyName": "Venus Rent a Car",
+    "source": "Email marketing",
+    "salesPersonEmails": [
+      "huzef@excellentpublicity.com"
+    ],
+    "email": "daya@venusrentacar.com",
+    "contactName": "Arulya Shankar Singh",
+    "designation": "Director",
+    "notes": "Client confirmed interest in IndiGo Inflight Magazine ad on Monday (Oct 27). Sender proposed potential cross-sell for Train (Vande Bharat, Rajdhani, Shatabdi), Cricket Association, and Celebrity endorcesment.",
+    "services": [
+      "Inflight",
+      "Transit",
+      "Celebrity Endorsement"
+    ]
+  }
+}
+

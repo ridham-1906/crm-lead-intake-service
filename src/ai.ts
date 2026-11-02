@@ -3,7 +3,8 @@ import { getEnv } from "./env.js";
 import { errInfo, log } from "./log.js";
 
 export type Provider = "groq" | "openrouter";
-export type Target = { provider: Provider; model: string };
+// account: index into that provider's comma-separated API keys.
+export type Target = { provider: Provider; model: string; account: number };
 export type Rotation = "round-robin" | "fallback";
 
 // Both speak the OpenAI chat-completions format.
@@ -29,9 +30,15 @@ class ModelError extends Error {
 type ChatResponse = {
   error?: { message?: string; code?: number | string };
   choices?: { finish_reason?: string; message?: { content?: string | null } }[];
+  usage?: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } };
 };
 
-export type Answer = { content: string | undefined; finishReason: string | undefined };
+// usage.cached shows how many input tokens the provider served from its prompt cache.
+export type Answer = {
+  content: string | undefined;
+  finishReason: string | undefined;
+  usage?: { input?: number; output?: number; cached?: number };
+};
 export type ReadResult<T> = { ok: true; value: T } | { ok: false; unusable: string };
 
 let turn = 0;
@@ -39,7 +46,9 @@ const coolingUntil = new Map<string, number>();
 // Models that rejected json_schema; they get json_object plus the schema in the prompt instead.
 const noJsonSchema = new Set<string>();
 
-const keyOf = (t: Target) => `${t.provider}:${t.model}`;
+// Log and cooldown label: "groq:model" for the first account, "groq#2:model" for the second; never the key itself.
+const keyOf = (t: Target) => `${t.provider}${t.account ? `#${t.account + 1}` : ""}:${t.model}`;
+const modelKey = (t: Target) => `${t.provider}:${t.model}`;
 
 function rotate<T>(items: T[], start: number): T[] {
   if (!items.length) return items;
@@ -47,13 +56,21 @@ function rotate<T>(items: T[], start: number): T[] {
   return [...items.slice(s), ...items.slice(0, s)];
 }
 
-// Groq models first, then OpenRouter; each group rotated per call (round-robin) or in listed order (fallback).
-export function modelOrder(groq: string[], openrouter: string[], rotation: Rotation, now = Date.now()): Target[] {
+// Groq first, then OpenRouter. Within a provider each model is tried on every account before the next model;
+// round-robin rotates both the starting model and the starting account per call.
+export function modelOrder(
+  groq: string[],
+  openrouter: string[],
+  rotation: Rotation,
+  accounts: Record<Provider, number> = { groq: 1, openrouter: 1 },
+  now = Date.now(),
+): Target[] {
   const start = rotation === "round-robin" ? turn++ : 0;
-  const targets: Target[] = [
-    ...rotate(groq, start).map((model) => ({ provider: "groq" as const, model })),
-    ...rotate(openrouter, start).map((model) => ({ provider: "openrouter" as const, model })),
-  ];
+  const expand = (provider: Provider, models: string[]) => {
+    const ids = rotate([...Array(Math.max(accounts[provider], 1)).keys()], start);
+    return rotate(models, start).flatMap((model) => ids.map((account) => ({ provider, model, account })));
+  };
+  const targets = [...expand("groq", groq), ...expand("openrouter", openrouter)];
   return targets.filter((t) => (coolingUntil.get(keyOf(t)) ?? 0) <= now);
 }
 
@@ -69,7 +86,8 @@ async function callModel(target: Target, system: string, user: string, schema: R
   const env = getEnv();
   const cooldownMs = env.AI_COOLDOWN_SECONDS * 1000;
   const openrouter = target.provider === "openrouter";
-  const useSchema = !noJsonSchema.has(keyOf(target));
+  const useSchema = !noJsonSchema.has(modelKey(target));
+  const apiKey = (openrouter ? env.OPENROUTER_API_KEY : env.GROQ_API_KEY)[target.account];
 
   const body = {
     model: target.model,
@@ -93,7 +111,7 @@ async function callModel(target: Target, system: string, user: string, schema: R
     res = await fetch(ENDPOINTS[target.provider], {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openrouter ? env.OPENROUTER_API_KEY : env.GROQ_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         ...(openrouter ? { "X-Title": "ep-lead-intake" } : {}),
       },
@@ -108,7 +126,7 @@ async function callModel(target: Target, system: string, user: string, schema: R
   if (!res.ok || data.error) {
     const message = data.error?.message ?? "no error message";
     if (useSchema && res.status === 400 && /response.?format|json.?schema/i.test(message)) {
-      noJsonSchema.add(keyOf(target));
+      noJsonSchema.add(modelKey(target));
       log.warn({ model: keyOf(target) }, "model rejected json_schema; using json_object");
       return callModel(target, system, user, schema);
     }
@@ -117,7 +135,12 @@ async function callModel(target: Target, system: string, user: string, schema: R
     throw new ModelError(`${status}: ${message}`, status, cooldownFrom(res, cooldownMs));
   }
   const choice = data.choices?.[0];
-  return { content: choice?.message?.content ?? undefined, finishReason: choice?.finish_reason };
+  const usage = {
+    input: data.usage?.prompt_tokens,
+    output: data.usage?.completion_tokens,
+    cached: data.usage?.prompt_tokens_details?.cached_tokens ?? 0,
+  };
+  return { content: choice?.message?.content ?? undefined, finishReason: choice?.finish_reason, usage };
 }
 
 // Asks each available model in order until one gives a usable answer. Throws only when every model errored.
@@ -129,7 +152,10 @@ export async function askJson<T>(
   ctx: { messageId: string; mailSubject: string },
 ): Promise<ReadResult<T>> {
   const env = getEnv();
-  const targets = modelOrder(env.GROQ_MODELS, env.OPENROUTER_MODELS, env.AI_ROTATION);
+  const targets = modelOrder(env.GROQ_MODELS, env.OPENROUTER_MODELS, env.AI_ROTATION, {
+    groq: env.GROQ_API_KEY.length,
+    openrouter: env.OPENROUTER_API_KEY.length,
+  });
   if (!targets.length) throw new AiUnavailableError("every AI model is cooling down after rate limits or errors");
 
   const failures: string[] = [];
@@ -138,9 +164,10 @@ export async function askJson<T>(
   for (const target of targets) {
     const model = keyOf(target);
     try {
-      const result = read(await callModel(target, system, user, schema));
+      const answer = await callModel(target, system, user, schema);
+      const result = read(answer);
       if (result.ok) {
-        log.info({ messageId: ctx.messageId, model }, "AI answered");
+        log.info({ messageId: ctx.messageId, model, tokens: answer.usage }, "AI answered");
         return result;
       }
       unusable = result.unusable;

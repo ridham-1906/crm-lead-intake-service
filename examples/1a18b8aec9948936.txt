@@ -1,0 +1,396 @@
+===== Mail received (2026-10-30T06:41:43.851Z) =====
+Gmail id:   1a18b8aec9948936  (thread 1a18b8aec9948936)
+Labels:     UNREAD, INBOX, Label_1222915040592129127
+From:       Man Navlakha <man@excellentpublicity.com>
+To:         huzef@excellentpublicity.com
+Cc:         vaishal@growwithexcellentpublicity.com
+Subject:    Fwd: FW: Place JK Group On IndiGo Inflight Magazine
+Date:       Fri, 30 Oct 2026 12:11:28 +0530
+Auth:       mx.google.com;       dkim=pass header.i=@excellentpublicity.com header.s=google header.b=Tbu4Uis4;       arc=pass (i=1);       spf=pass (google.com: domain of man@excellentpublicity.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=man@excellentpublicity.com;       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=excellentpublicity.com;       dara=neutral header.i=@growwithexcellentpublicity.com
+Body chars: 3400
+
+Feel free to contact us in case of any query.
+
+Thanking you,
+With best regards,
+[image: Atlas by Excellent Publicity]
+<https://atlas.excellentpublicity.com/>
+[image: Man Navlakha - Excellent Publicity]
+
+
+---------- Forwarded message ---------
+From: Upashana Hazarika <upashana@excellentpublicity.com>
+Date: Thu, Oct 29, 2026 at 11:05 AM
+Subject: Re: FW: Place JK Group On IndiGo Inflight Magazine
+To: <maheshjagtap@jktravels.co.in>
+Cc: <snehal@excellentpublicity.com>, <surbhi@excellentpublicity.com>,
+Amisha Darji <amisha@excellentpublicity.com>, <akash@excellentpublicity.com>,
+<manan@excellentpublicity.com>, Man Navlakha <man@excellentpublicity.com>
+
+
+Hello Mahesh,
+>
+> I hope you are doing well.
+>
+> Could you please let me know your availability for a quick call to better
+> understand your requirements? We also have multiple options that we would
+> be happy to walk you through based on your needs.
+>
+> Kindly share your contact number and a convenient time to connect, or feel
+> free to reach me directly at *9898597813 <(989)%20859-7813>*.
+>
+> Looking forward to speaking with you.
+>
+
+Regards
+Upashana Hazarika
+
+> *From:* Amit Thakkar <amit@excellentpublicityconnect.com>
+> *Sent:* 28 October 2026 13:40
+> *To:* inquiry@excellentpublicity.com
+> *Subject:* Re: Place JK Group On IndiGo Inflight Magazine
+>
+>
+>
+> ---------- Forwarded message ---------
+> From: *Mahesh Jagtap* <maheshjagtap@jktravels.co.in>
+> Date: Wed, Oct 28, 2026 at 10:44 am
+> Subject: Re: Place JK Group On IndiGo Inflight Magazine
+> To: <amit@excellentpublicityconnect.com>
+>
+>
+>
+> Okay
+>
+>
+>
+>
+>
+> Thanks
+>
+>
+>
+> On Wed, 28 Oct, 2026, 10:21 Amit Thakkar, <
+> amit@excellentpublicityconnect.com> wrote:
+>
+> Hi Mahesh,
+>
+> A fresh opportunity has come up for JK Group in IndiGo's inflight
+> magazine, especially on high-visibility pages.
+>
+> This can be one of the most effective channels to reach business
+> travellers, HNIs, NRIs and international passengers.
+>
+> Beyond this, JK Group can also advertise with us across:
+> Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+> Indian cricket association, starting from 1.5 lakh
+> Celebrity association, starting from 3 lakhs
+>
+> If this sounds relevant, I can share a meeting link for a short 10-minute
+> call.
+>
+> Best regards,
+>
+> *Amit Thakkar*
+> Excellent Publicity
+> +91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+> Member of BNI, Corporate Connections & Offline
+>
+>
+>
+> On Wed, Oct 28, 2026 at 04:51 AM UTC <amit@excellentpublicityconnect.com>
+> wrote:
+>
+> Hi Mahesh,
+>
+> A fresh opportunity has come up for JK Group in IndiGo's inflight
+> magazine, especially on high-visibility pages.
+>
+> This can be one of the most effective channels to reach business
+> travellers, HNIs, NRIs and international passengers.
+>
+> Beyond this, JK Group can also advertise with us across:
+> Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+> Indian cricket association, starting from 1.5 lakh
+> Celebrity association, starting from 3 lakhs
+>
+> If this sounds relevant, I can share a meeting link for a short 10-minute
+> call.
+>
+> Best regards,
+>
+> *Amit Thakkar*
+> Excellent Publicity
+> +91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+> Member of BNI, Corporate Connections & Offline
+>
+>
+
+===== Sender check (2026-10-30T06:41:43.852Z) =====
+passed (allowed sender, authenticated)
+
+===== AI input (exactly what the model receives) (2026-10-30T06:41:43.882Z) =====
+<users>
+aayush.sharma <aayush.sharma@excellentpublicity.com>
+abhinav <abhinav@excellentpublicity.com>
+abhishek.sonar <abhishek.sonar@excellentpublicity.com>
+akash <akash@excellentpublicity.com>
+ami <ami@excellentpublicity.com>
+amisha <amisha@excellentpublicity.com>
+amit <amit@excellentpublicity.com>
+atish <atish@excellentpublicity.com>
+bhavinee <bhavinee@excellentpublicity.com>
+dev <dev@excellentpublicity.com>
+drashti <drashti@excellentpublicity.com>
+ekta <ekta@excellentpublicity.com>
+hemanth <hemanth@excellentpublicity.com>
+hitaksh <hitaksh@excellentpublicity.com>
+huzef <huzef@excellentpublicity.com>
+jahanvi <jahanvi@excellentpublicity.com>
+karan.sharma <karan.sharma@excellentpublicity.com>
+kaushik <kaushik@excellentpublicity.com>
+maitreyee <maitreyee@excellentpublicity.com>
+man+admin <man+admin@excellentpublicity.com>
+man <man@excellentpublicity.com>
+manan <manan@excellentpublicity.com>
+manav <manav@excellentpublicity.com>
+mayurdhwaj <mayurdhwaj@excellentpublicity.com>
+mohit.bhandari <mohit.bhandari@excellentpublicity.com>
+neer <neer@excellentpublicity.com>
+neha.chauhan <neha.chauhan@excellentpublicity.com>
+nihal <nihal@excellentpublicity.com>
+pankti <pankti@excellentpublicity.com>
+poojan.joshi <poojan.joshi@excellentpublicity.com>
+prahar <prahar@excellentpublicity.com>
+pratham <pratham@excellentpublicity.com>
+priya <priya@excellentpublicity.com>
+priyansh <priyansh@excellentpublicity.com>
+rashmi <rashmi@excellentpublicity.com>
+rhythem <rhythem@excellentpublicity.com>
+ridham+sale <ridham+sale@excellentpublicity.com>
+ridham <ridham@excellentpublicity.com>
+rudra <rudra@excellentpublicity.com>
+rudraksh <rudraksh@excellentpublicity.com>
+rutvik <rutvik@excellentpublicity.com>
+sakshi.thakkar <sakshi.thakkar@excellentpublicity.com>
+shailendra <shailendra@excellentpublicity.com>
+shivani <shivani@excellentpublicity.com>
+snehal <snehal@excellentpublicity.com>
+surbhi <surbhi@excellentpublicity.com>
+tamanna <tamanna@excellentpublicity.com>
+tanvi <tanvi@excellentpublicity.com>
+vaishal <vaishal@excellentpublicity.com>
+vidhi.dodhia <vidhi.dodhia@excellentpublicity.com>
+viral <viral@excellentpublicity.com>
+vishal.makwana <vishal.makwana@excellentpublicity.com>
+yogesh <yogesh@excellentpublicity.com>
+</users>
+<services>
+- Cinema
+- Digital
+- Digital PR
+- GTM
+- Gifting - Vouchers
+- In-app and OTT
+- Influencer Marketing
+- Performance Marketing
+- Portal
+- Programmatic Ads
+- Radio
+- SEO
+- Social Media
+- Television
+- Activation
+- Airport
+- BTL
+- Celebrity Endorsement
+- Corporate Gifting
+- Events & Sponsorships
+- Gifting - Products
+- Gifting - Tickets & Experiences
+- In-Film and Out-Film
+- Inflight
+- Magazine
+- Newspaper
+- Non Traditional
+- Offline
+- Others
+- Outdoor
+- Outdoor 1
+- Outdoor 2
+- Outdoor 3
+- Outdoor 4
+- Outdoor 5
+- Outdoor 6
+- Retail Marketing and Merchandising
+- Sports Marketing
+- Transit
+</services>
+<assignees>
+huzef@excellentpublicity.com
+</assignees>
+<mail>
+From: Man Navlakha <man@excellentpublicity.com>
+To: huzef@excellentpublicity.com
+Cc: vaishal@growwithexcellentpublicity.com
+Date: Fri, 30 Oct 2026 12:11:28 +0530
+Subject: Fwd: FW: Place JK Group On IndiGo Inflight Magazine
+
+Feel free to contact us in case of any query.
+
+Thanking you,
+With best regards,
+[image: Atlas by Excellent Publicity]
+<https://atlas.excellentpublicity.com/>
+[image: Man Navlakha - Excellent Publicity]
+
+
+---------- Forwarded message ---------
+From: Upashana Hazarika <upashana@excellentpublicity.com>
+Date: Thu, Oct 29, 2026 at 11:05 AM
+Subject: Re: FW: Place JK Group On IndiGo Inflight Magazine
+To: <maheshjagtap@jktravels.co.in>
+Cc: <snehal@excellentpublicity.com>, <surbhi@excellentpublicity.com>,
+Amisha Darji <amisha@excellentpublicity.com>, <akash@excellentpublicity.com>,
+<manan@excellentpublicity.com>, Man Navlakha <man@excellentpublicity.com>
+
+
+Hello Mahesh,
+>
+> I hope you are doing well.
+>
+> Could you please let me know your availability for a quick call to better
+> understand your requirements? We also have multiple options that we would
+> be happy to walk you through based on your needs.
+>
+> Kindly share your contact number and a convenient time to connect, or feel
+> free to reach me directly at *9898597813 <(989)%20859-7813>*.
+>
+> Looking forward to speaking with you.
+>
+
+Regards
+Upashana Hazarika
+
+> *From:* Amit Thakkar <amit@excellentpublicityconnect.com>
+> *Sent:* 28 October 2026 13:40
+> *To:* inquiry@excellentpublicity.com
+> *Subject:* Re: Place JK Group On IndiGo Inflight Magazine
+>
+>
+>
+> ---------- Forwarded message ---------
+> From: *Mahesh Jagtap* <maheshjagtap@jktravels.co.in>
+> Date: Wed, Oct 28, 2026 at 10:44 am
+> Subject: Re: Place JK Group On IndiGo Inflight Magazine
+> To: <amit@excellentpublicityconnect.com>
+>
+>
+>
+> Okay
+>
+>
+>
+>
+>
+> Thanks
+>
+>
+>
+> On Wed, 28 Oct, 2026, 10:21 Amit Thakkar, <
+> amit@excellentpublicityconnect.com> wrote:
+>
+> Hi Mahesh,
+>
+> A fresh opportunity has come up for JK Group in IndiGo's inflight
+> magazine, especially on high-visibility pages.
+>
+> This can be one of the most effective channels to reach business
+> travellers, HNIs, NRIs and international passengers.
+>
+> Beyond this, JK Group can also advertise with us across:
+> Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+> Indian cricket association, starting from 1.5 lakh
+> Celebrity association, starting from 3 lakhs
+>
+> If this sounds relevant, I can share a meeting link for a short 10-minute
+> call.
+>
+> Best regards,
+>
+> *Amit Thakkar*
+> Excellent Publicity
+> +91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+> Member of BNI, Corporate Connections & Offline
+>
+>
+>
+> On Wed, Oct 28, 2026 at 04:51 AM UTC <amit@excellentpublicityconnect.com>
+> wrote:
+>
+> Hi Mahesh,
+>
+> A fresh opportunity has come up for JK Group in IndiGo's inflight
+> magazine, especially on high-visibility pages.
+>
+> This can be one of the most effective channels to reach business
+> travellers, HNIs, NRIs and international passengers.
+>
+> Beyond this, JK Group can also advertise with us across:
+> Vande Bharat, Rajdhani and Shatabdi trains, starting from 1 lakh
+> Indian cricket association, starting from 1.5 lakh
+> Celebrity association, starting from 3 lakhs
+>
+> If this sounds relevant, I can share a meeting link for a short 10-minute
+> call.
+>
+> Best regards,
+>
+> *Amit Thakkar*
+> Excellent Publicity
+> +91 7600 623 456 <+91%2076006%2023456> | inquiry@excellentpublicity.com
+> Member of BNI, Corporate Connections & Offline
+>
+>
+</mail>
+
+===== AI result (2026-10-30T06:41:44.617Z) =====
+{
+  "ok": true,
+  "payload": {
+    "companyName": "JK Group",
+    "source": "Email inquiry",
+    "salesPersonEmails": [
+      "huzef@excellentpublicity.com"
+    ],
+    "email": "maheshjagtap@jktravels.co.in",
+    "contactName": "Mahesh Jagtap",
+    "notes": "Inquiry for JK Group placement in IndiGo inflight magazine (Oct 2026). Upashana requested call to discuss requirements and options; no client WhatsApp/phone provided yet.",
+    "services": [
+      "Inflight",
+      "Transit",
+      "Celebrity Endorsement"
+    ]
+  }
+}
+
+===== Validation (2026-10-30T06:41:44.618Z) =====
+{
+  "ok": true,
+  "payload": {
+    "companyName": "JK Group",
+    "email": "maheshjagtap@jktravels.co.in",
+    "contactName": "Mahesh Jagtap",
+    "notes": "Inquiry for JK Group placement in IndiGo inflight magazine (Oct 2026). Upashana requested call to discuss requirements and options; no client WhatsApp/phone provided yet.",
+    "source": "Email inquiry",
+    "services": [
+      "Inflight",
+      "Transit",
+      "Celebrity Endorsement"
+    ],
+    "salesPersonEmails": [
+      "huzef@excellentpublicity.com"
+    ]
+  }
+}
+

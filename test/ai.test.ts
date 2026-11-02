@@ -47,6 +47,19 @@ describe("askJson provider fallback", () => {
     expect(calls[1]).toContain("openrouter.ai");
   });
 
+  it("moves to the second Groq key when the first is rate-limited", async () => {
+    vi.stubEnv("GROQ_API_KEY", "gk1, gk2");
+    const keys: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => {
+      const key = String((init.headers as Record<string, string>).Authorization);
+      keys.push(key);
+      return key.endsWith("gk1") ? fail(429, "Rate limit reached") : ok("{}");
+    }));
+    const { askJson } = await import("../src/ai.js");
+    expect(await askJson("sys", "user", {}, read, ctx)).toMatchObject({ ok: true });
+    expect(keys).toEqual(["Bearer gk1", "Bearer gk2"]);
+  });
+
   it("retries a model with json_object when it rejects json_schema", async () => {
     const formats: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => {

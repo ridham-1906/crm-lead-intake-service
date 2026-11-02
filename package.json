@@ -10,7 +10,8 @@
     "dry-run": "node --env-file-if-exists=.env --import tsx scripts/dry-run.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "try-examples": "node --env-file-if-exists=.env --import tsx scripts/try-examples.ts"
   },
   "dependencies": {
     "google-auth-library": "^11.3.2",
