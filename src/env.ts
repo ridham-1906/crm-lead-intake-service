@@ -3,10 +3,6 @@ import { z } from "zod";
 const list = z.string().transform((s) => s.split(",").map((x) => x.trim()).filter(Boolean));
 const emailList = list.transform((xs) => xs.map((x) => x.toLowerCase())).pipe(z.array(z.email()).min(1));
 const email = z.email().transform((e) => e.toLowerCase());
-const optionalText = z
-  .string()
-  .optional()
-  .transform((s) => s?.trim() || undefined);
 const optionalList = z
   .string()
   .optional()
@@ -30,9 +26,10 @@ const schema = z.object({
   PUBSUB_AUDIENCE: z.url(),
   PUBSUB_SERVICE_ACCOUNT: z.email(),
 
-  GROQ_API_KEY: optionalText,
+  // Comma-separated keys from different accounts; each model is tried on every key.
+  GROQ_API_KEY: optionalList,
   GROQ_MODELS: optionalList,
-  OPENROUTER_API_KEY: optionalText,
+  OPENROUTER_API_KEY: optionalList,
   OPENROUTER_MODELS: optionalList,
   AI_ROTATION: z.enum(["round-robin", "fallback"]).default("round-robin"),
   AI_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),
@@ -52,10 +49,10 @@ const schema = z.object({
   DRY_RUN: bool,
   DEBUG_DUMP: bool,
 }).superRefine((env, ctx) => {
-  if (env.GROQ_MODELS.length && !env.GROQ_API_KEY) {
+  if (env.GROQ_MODELS.length && !env.GROQ_API_KEY.length) {
     ctx.addIssue({ code: "custom", path: ["GROQ_API_KEY"], message: "required when GROQ_MODELS is set" });
   }
-  if (env.OPENROUTER_MODELS.length && !env.OPENROUTER_API_KEY) {
+  if (env.OPENROUTER_MODELS.length && !env.OPENROUTER_API_KEY.length) {
     ctx.addIssue({ code: "custom", path: ["OPENROUTER_API_KEY"], message: "required when OPENROUTER_MODELS is set" });
   }
   if (!env.GROQ_MODELS.length && !env.OPENROUTER_MODELS.length) {

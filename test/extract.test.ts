@@ -73,6 +73,17 @@ describe("modelOrder", () => {
     expect(b[0]?.provider).toBe("groq");
   });
 
+  it("tries each model on every account before the next model", () => {
+    const order = modelOrder(groq, [], "fallback", { groq: 2, openrouter: 1 });
+    expect(order.map((t) => `${t.model}#${t.account}`)).toEqual(["g1#0", "g1#1", "g2#0", "g2#1"]);
+  });
+
+  it("alternates the starting account in round-robin mode", () => {
+    const a = modelOrder(["g1"], [], "round-robin", { groq: 2, openrouter: 1 });
+    const b = modelOrder(["g1"], [], "round-robin", { groq: 2, openrouter: 1 });
+    expect(a[0]?.account).not.toBe(b[0]?.account);
+  });
+
   it("works with only one provider configured", () => {
     expect(modelOrder([], openrouter, "fallback").map((t) => t.provider)).toEqual(["openrouter", "openrouter"]);
   });

@@ -151,8 +151,8 @@ All variables are in [example.env](../example.env), with comments.
 | `GMAIL_PUBSUB_TOPIC` | ✓ | | `projects/<project>/topics/<topic>` |
 | `PUBSUB_AUDIENCE` | ✓ | | Push endpoint URL |
 | `PUBSUB_SERVICE_ACCOUNT` | ✓ | | Push subscription's service account email |
-| `GROQ_API_KEY`, `GROQ_MODELS` | one provider ✓ | | Groq key and comma-separated model ids; tried first |
-| `OPENROUTER_API_KEY`, `OPENROUTER_MODELS` | one provider ✓ | | OpenRouter key and model ids; used when Groq is exhausted |
+| `GROQ_API_KEY`, `GROQ_MODELS` | one provider ✓ | | Groq key(s) and comma-separated model ids; tried first. Several keys (different accounts) are comma-separated |
+| `OPENROUTER_API_KEY`, `OPENROUTER_MODELS` | one provider ✓ | | OpenRouter key(s) and model ids; used when Groq is exhausted. Several keys are comma-separated |
 | `AI_ROTATION` | | `round-robin` | `round-robin` or `fallback` (§5) |
 | `AI_COOLDOWN_SECONDS` | | `60` | How long a failed model is skipped |
 | `CRM_URL`, `LEAD_IMPORT_API_KEY` | ✓ | | CRM address and import key |
@@ -195,6 +195,8 @@ Their domain is then treated as ours for that thread, and every phone number in 
 
 Either provider can be left out by leaving its `…_MODELS` empty, but at least one must be set.
 
+**Several accounts.** `GROQ_API_KEY` and `OPENROUTER_API_KEY` each accept several keys, comma-separated, from different accounts. Free limits are per account, so each extra key adds a full extra quota. Every model is tried on each key before the next model (model A on key 1, model A on key 2, then model B …), and a rate-limited key is skipped only for that model. In `round-robin` mode each mail also starts on the next key. Logs and alerts name an account by position (`groq:model` is the first key, `groq#2:model` the second); they never show the key.
+
 **Choosing models.**
 - **Groq:** pick ids from [console.groq.com/docs/models](https://console.groq.com/docs/models), for example a Qwen model.
 - **OpenRouter:** free models must support **structured outputs**. To list them:
@@ -214,7 +216,7 @@ curl -s https://openrouter.ai/api/v1/models   | jq -r '.data[] | select(.id|ends
 | `round-robin` (default) | Mail 1 starts with Groq model A, mail 2 with Groq model B, … | Remaining Groq models, then OpenRouter models |
 | `fallback` | Always Groq model A | Groq B, C, …, then OpenRouter models |
 
-A model that returns an error is skipped for `AI_COOLDOWN_SECONDS` (or for as long as the provider's `Retry-After` header says). A model that returns unusable output (not JSON, wrong format) isn't benched, but the next model is tried. If every model returns unusable output, the mail goes to review. If every model errors or is benched, the mail stays queued for the next sweep and an alert is sent.
+A model (on one key) that returns an error is skipped for `AI_COOLDOWN_SECONDS` (or for as long as the provider's `Retry-After` header says). A model that returns unusable output (not JSON, wrong format) isn't benched, but the next model is tried. If every model returns unusable output, the mail goes to review. If every model errors or is benched, the mail stays queued for the next sweep and an alert is sent.
 
 **Free-tier limits** (approximate; providers change them often):
 - **Groq:** per model and per account; roughly 30 requests per minute and about 1,000 per day for larger models. Check the limits page in the Groq console.
