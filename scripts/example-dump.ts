@@ -27,6 +27,7 @@ export function parseDump(id: string, text: string): { mail: Mail; reference: Re
     fromHeader,
     to: extractAddresses(field(received, "To")),
     cc: extractAddresses(field(received, "Cc")),
+    deliveredTo: "",
     subject: field(received, "Subject"),
     date: field(received, "Date"),
     body: received.slice(bodyStart).trim(),

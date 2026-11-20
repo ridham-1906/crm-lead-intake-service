@@ -83,6 +83,13 @@ GMAIL_INTAKE_LABEL=Lead-Intake
 
 Keep the filter's senders the same as `ALLOWED_SENDERS` in `.env`; the service skips mail from anyone else. To add a sender later, add `OR new@…` to the filter's **From** field and add the address to `ALLOWED_SENDERS`.
 
+**Secret address (optional), for senders you can't list, such as outreach lookalike domains.** Pick a plus address of the intake mailbox, for example `crm+<private-tag>@excellentpublicity.co`; Gmail delivers it to the same inbox with no extra setup.
+
+3. Create a second filter: leave **From** and **To** empty, put `deliveredto:crm+<private-tag>@excellentpublicity.co` in **Has the words**, tick **Apply the label: Lead-Intake**.
+4. Put the same address in `.env` as `SECRET_INTAKE_ADDRESS`, then restart.
+
+Anyone who **Bcc's** this address gets the mail processed like an allowed sender's; in To or Cc it is ignored. Keep it private; to change it, update both the filter and `.env`.
+
 ## 6. Pub/Sub topic (`GMAIL_PUBSUB_TOPIC`)
 
 1. Go to **Pub/Sub → Topics → Create topic**.

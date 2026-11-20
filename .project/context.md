@@ -4,9 +4,9 @@ Standalone Node 22 / TypeScript (ESM) service that turns inquiry emails to a con
 
 ## Data flow
 
-Gmail filter labels allowed senders' mail `Lead-Intake` → `users.watch` (that label) → Pub/Sub push → `POST /gmail/push` (OIDC verified, 204 immediately) → `sweep()` searches `label:Lead-Intake -label:CRM-Done -label:CRM-Review -label:CRM-Ignored` → `enqueue()` → single worker drains the FIFO queue one message at a time (`src/queue.ts`). Sweeps also run on boot and every `SWEEP_INTERVAL_MINUTES`; the Gmail watch is renewed daily.
+Gmail filters label `Lead-Intake` on allowed senders' mail and on mail delivered to `SECRET_INTAKE_ADDRESS` (`deliveredto:`) → `users.watch` (that label) → Pub/Sub push → `POST /gmail/push` (OIDC verified, 204 immediately) → `sweep()` searches `label:Lead-Intake -label:CRM-Done -label:CRM-Review -label:CRM-Ignored` → `enqueue()` → single worker drains the FIFO queue one message at a time (`src/queue.ts`). Sweeps also run on boot and every `SWEEP_INTERVAL_MINUTES`; the Gmail watch is renewed daily.
 
-Per message (`src/process.ts`): fetch + parse → skip if already outcome-labelled → allowlist + Gmail `Authentication-Results` (DMARC, or SPF+DKIM) → CRM reference (cached 5 min) → AI draft via Groq/OpenRouter (`src/extract.ts`, `src/ai.ts`) → code validation → CRM create → (review: forward to `LEAD_GENERATOR_EMAIL`) → outcome label **last**. The service only ever sends two kinds of mail: the review forward and error alerts. No replies to the sender; on success the CRM notifies assignees.
+Per message (`src/process.ts`): fetch + parse → skip if already outcome-labelled → sender check (`senderCheck`): Bcc to optional `SECRET_INTAKE_ADDRESS` (first `Delivered-To` header equals it, absent from To/Cc) passes from any sender with no auth check; otherwise allowlist + Gmail `Authentication-Results` (DMARC, or SPF+DKIM) → CRM reference (cached 5 min) → AI draft via Groq/OpenRouter (`src/extract.ts`, `src/ai.ts`) → code validation → CRM create → (review: forward to `LEAD_GENERATOR_EMAIL`) → outcome label **last**. The service only ever sends two kinds of mail: the review forward and error alerts. No replies to the sender; on success the CRM notifies assignees.
 
 ## AI (Groq first, then OpenRouter)
 

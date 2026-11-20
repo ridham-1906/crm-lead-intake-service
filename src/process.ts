@@ -74,6 +74,7 @@ async function dumpMail(mail: Mail): Promise<void> {
     `From:       ${mail.fromHeader}`,
     `To:         ${mail.to.join(", ")}`,
     `Cc:         ${mail.cc.join(", ")}`,
+    `Delivered:  ${mail.deliveredTo}`,
     `Subject:    ${mail.subject}`,
     `Date:       ${mail.date}`,
     `Auth:       ${mail.authResults.join("\n            ") || "(no Authentication-Results header)"}`,
@@ -85,8 +86,18 @@ async function dumpMail(mail: Mail): Promise<void> {
   console.log(`[debug] mail ${mail.id} "${mail.subject}" from ${mail.from} → ${file}`);
 }
 
+// True when SECRET_INTAKE_ADDRESS received the mail as a Bcc (delivered to it, but not listed in To or Cc).
+export function bccToSecret(mail: Mail): boolean {
+  const secret = getEnv().SECRET_INTAKE_ADDRESS;
+  return !!secret && mail.deliveredTo === secret && !mail.to.includes(secret) && !mail.cc.includes(secret);
+}
+
+// Bcc to the secret address passes from any sender; otherwise the sender must be allowlisted and authenticated.
 export function senderCheck(mail: Mail): string | undefined {
-  if (!getEnv().ALLOWED_SENDERS.includes(mail.from)) return "sender not on the allowlist";
+  if (bccToSecret(mail)) return undefined;
+  const secret = getEnv().SECRET_INTAKE_ADDRESS;
+  const inToOrCc = !!secret && [...mail.to, ...mail.cc].includes(secret);
+  if (!getEnv().ALLOWED_SENDERS.includes(mail.from)) return inToOrCc ? "secret address must be in Bcc" : "sender not on the allowlist";
   if (!isSenderAuthenticated(mail)) return "sender failed DMARC/SPF+DKIM";
   return undefined;
 }
@@ -111,7 +122,7 @@ export async function processMessage(id: string): Promise<Outcome> {
   if (env.DEBUG_DUMP) await dumpMail(mail);
 
   const rejected = senderCheck(mail);
-  if (env.DEBUG_DUMP) await dumpToFile(id, "Sender check", rejected ?? "passed (allowed sender, authenticated)");
+  if (env.DEBUG_DUMP) await dumpToFile(id, "Sender check", rejected ?? (bccToSecret(mail) ? "passed (Bcc to secret address)" : "passed (allowed sender, authenticated)"));
   if (rejected) {
     log.info({ ...ctx, outcome: "ignored", reason: rejected }, "mail ignored");
     if (!env.DRY_RUN) await gmail.addLabel(id, gmail.IGNORED);

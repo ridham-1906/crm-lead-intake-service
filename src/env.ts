@@ -40,6 +40,8 @@ const schema = z.object({
   // Optional extra domains that are always ours; most are learned per thread (see threadHints).
   INTERNAL_DOMAINS: optionalList,
   ALLOWED_SENDERS: emailList,
+  // Optional; mail Bcc'd to this address is accepted from any sender.
+  SECRET_INTAKE_ADDRESS: z.preprocess((v) => (v === "" ? undefined : v), email.optional()),
   LEAD_GENERATOR_EMAIL: email,
 
   ALERT_EMAIL: emailList,
@@ -49,6 +51,9 @@ const schema = z.object({
   DRY_RUN: bool,
   DEBUG_DUMP: bool,
 }).superRefine((env, ctx) => {
+  if (env.SECRET_INTAKE_ADDRESS === env.INTAKE_MAILBOX) {
+    ctx.addIssue({ code: "custom", path: ["SECRET_INTAKE_ADDRESS"], message: "must differ from INTAKE_MAILBOX" });
+  }
   if (env.GROQ_MODELS.length && !env.GROQ_API_KEY.length) {
     ctx.addIssue({ code: "custom", path: ["GROQ_API_KEY"], message: "required when GROQ_MODELS is set" });
   }
