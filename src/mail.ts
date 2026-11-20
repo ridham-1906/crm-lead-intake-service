@@ -12,6 +12,8 @@ export type Mail = {
   fromHeader: string;
   to: string[];
   cc: string[];
+  // First Delivered-To header, the one Gmail adds for our mailbox; reveals a Bcc'd address.
+  deliveredTo: string;
   subject: string;
   date: string;
   body: string;
@@ -99,6 +101,7 @@ export function parseMessage(msg: gmail_v1.Schema$Message): Mail {
     fromHeader,
     to: extractAddresses(header(root, "To")),
     cc: extractAddresses(header(root, "Cc")),
+    deliveredTo: extractAddress(header(root, "Delivered-To")),
     subject: header(root, "Subject"),
     date: header(root, "Date"),
     body: body.slice(0, BODY_LIMIT),

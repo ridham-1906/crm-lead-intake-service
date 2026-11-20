@@ -17,7 +17,16 @@ ep-lead-intake reads inquiry emails sent to one mailbox and creates the matching
 
 ## 1. Day-to-day use
 
-**Who sends:** only the addresses in `ALLOWED_SENDERS` (for example the co-founder).
+**Who sends:** two ways in, both work at the same time:
+
+- the addresses in `ALLOWED_SENDERS` (for example the co-founder), as below; or
+- anyone, from any address or domain (for example our outreach lookalike mailboxes), who puts the secret address `SECRET_INTAKE_ADDRESS` in **Bcc**. It must be Bcc: in To or Cc the mail is ignored. Keep the address private; if it leaks, change it in `.env` and in the Gmail filter.
+
+```
+To:   priya@excellentpublicity.com          ← salesperson to assign
+Cc:   manager@excellentpublicity.com        ← copied, never assigned
+Bcc:  <SECRET_INTAKE_ADDRESS>
+```
 
 **What to send:** forward the client's inquiry to the intake mailbox (`INTAKE_MAILBOX`), or Cc the mailbox on your reply. On top of the forward, write who should handle it.
 
@@ -86,7 +95,7 @@ sender ──▶ INTAKE_MAILBOX ──Gmail filter──▶ label "Lead-Intake"
                                               ▼
                                     queue (oldest first, one at a time)
                                               ▼
-  allowlist + sender authentication ─▶ AI drafts lead ─▶ checks in code ─▶ CRM create
+  sender check (allowlist + authentication, or Bcc to secret address) ─▶ AI drafts lead ─▶ checks in code ─▶ CRM create
 ```
 
 Each mail ends with one Gmail label. The labels are the record of what happened; there is no database.
@@ -95,7 +104,7 @@ Each mail ends with one Gmail label. The labels are the record of what happened;
 |---|---|---|
 | `CRM-Done` | Lead created | Nobody by this service; the CRM notifies the assigned salespeople |
 | `CRM-Review` | Lead not created (missing details, ambiguous owner, duplicate lead, CRM refused it) | Lead generator gets the forward with the reason |
-| `CRM-Ignored` | Sender isn't allowed, or the mail failed authentication (DMARC/SPF/DKIM) | Nobody |
+| `CRM-Ignored` | Not a Bcc to the secret address, and the sender isn't allowed or failed authentication (DMARC/SPF/DKIM) | Nobody |
 | *(no label yet)* | Not processed yet, or failed on our side (AI down, CRM down) and waiting for a retry | `ALERT_EMAIL`, if it's an error |
 
 To have a mail processed again, remove its `CRM-…` label in Gmail. The next sweep picks it up.
@@ -115,7 +124,7 @@ To have a mail processed again, remove its `CRM-…` label in Gmail. The next sw
 Do this once. You need admin access to Google Workspace, a Google Cloud project, an OpenRouter account and Railway.
 
 1. **Mailbox.** Pick the intake address, for example `leads@yourdomain.com`, and create it in Google Workspace. Put it in `INTAKE_MAILBOX`. Any address works; nothing else is hard-coded.
-2. **Gmail filter.** In that mailbox: *Settings → Filters → Create filter*, set **From** to the allowed senders (`a@x.com OR b@x.com`), then choose *Apply the label* `Lead-Intake` (create the label if it doesn't exist). The service creates `CRM-Done`, `CRM-Review` and `CRM-Ignored` itself.
+2. **Gmail filter.** In that mailbox: *Settings → Filters → Create filter*, set **From** to the allowed senders (`a@x.com OR b@x.com`), then choose *Apply the label* `Lead-Intake` (create the label if it doesn't exist). If you use `SECRET_INTAKE_ADDRESS`, create a second filter: leave **From**/**To** empty, put `deliveredto:<SECRET_INTAKE_ADDRESS>` in **Has the words**, and apply the same label (`deliveredto:` is what matches Bcc'd mail). The service creates `CRM-Done`, `CRM-Review` and `CRM-Ignored` itself.
 3. **Google Cloud.**
    1. Enable the **Gmail API** and **Cloud Pub/Sub API**.
    2. Pub/Sub → create topic `gmail-leads`. In the topic's permissions, grant `gmail-api-push@system.gserviceaccount.com` the **Pub/Sub Publisher** role.
@@ -158,6 +167,7 @@ All variables are in [example.env](../example.env), with comments.
 | `CRM_URL`, `LEAD_IMPORT_API_KEY` | ✓ | | CRM address and import key |
 | `INTERNAL_DOMAINS` | | | Optional. Extra domains that are always ours. Usually left empty: see §5, "Who is us" |
 | `ALLOWED_SENDERS` | ✓ | | Comma-separated senders allowed to submit inquiries |
+| `SECRET_INTAKE_ADDRESS` | | | Optional, e.g. a plus address of `INTAKE_MAILBOX`. Mail that Bcc's it is accepted from any sender, without the allowlist or authentication check. Must differ from `INTAKE_MAILBOX` |
 | `LEAD_GENERATOR_EMAIL` | ✓ | | Receives mail that needs a human |
 | `ALERT_EMAIL` | ✓ | | Comma-separated addresses for error alerts |
 | `ALERT_THROTTLE_MINUTES` | | `60` | Minimum gap between two alerts for the same error |
@@ -291,7 +301,7 @@ Alerts are sent from the intake mailbox. If Gmail itself is down, the alert can'
 | Startup fails with "GMAIL_REFRESH_TOKEN is for x, but INTAKE_MAILBOX is y" | Token created in the wrong Google account | Run `npm run authorize` again, signed in as `INTAKE_MAILBOX` |
 | Startup fails with "Environment is not valid" | Missing or malformed variable | The log lists each one under `missing` and `invalid`; compare with `example.env` |
 | Startup fails at "gmail sign-in as INTAKE_MAILBOX" with `invalid_grant` | Refresh token belongs to a different OAuth client, or was revoked | Run `npm run authorize` again signed in as `INTAKE_MAILBOX` |
-| Every mail is labelled `CRM-Ignored` | Sender not in `ALLOWED_SENDERS`, or internal mail arriving without Gmail authentication results | Check the log reason. If it's "sender failed DMARC/SPF+DKIM" for internal mail, look at the mail's original headers and raise it with the developer |
+| Every mail is labelled `CRM-Ignored` | Sender not in `ALLOWED_SENDERS` (and the secret address wasn't Bcc'd), or internal mail arriving without Gmail authentication results | Check the log reason. If it's "sender failed DMARC/SPF+DKIM" for internal mail, look at the mail's original headers and raise it with the developer |
 | Nothing happens when mail arrives | Gmail filter didn't add `Lead-Intake`, or the Pub/Sub push isn't reaching the service | Check the label is on the mail; check the subscription's delivery errors. Sweeps still catch mail within `SWEEP_INTERVAL_MINUTES` |
 | Push requests get `401` | `PUBSUB_AUDIENCE` or `PUBSUB_SERVICE_ACCOUNT` doesn't match the subscription | Make them identical to the subscription's settings |
 | AI alerts saying "No endpoints found matching your data policy" | OpenRouter privacy setting | Allow free-model data use in OpenRouter settings, or use paid models |
@@ -321,7 +331,7 @@ Labels follow ep-crm's: `app="ep-lead-intake"`, `env` (from `NODE_ENV`) and `lev
 | `model rejected json_schema; using json_object` | warning | A model doesn't support strict JSON schema |
 | `lead created` | info | Lead created (`leadId`, `messageId`) |
 | `mail sent to review` / `CRM refused lead` | info | Mail forwarded to the lead generator, with `reason` |
-| `mail ignored` | info | Sender not allowed or failed authentication, with `reason` |
+| `mail ignored` | info | Sender not allowed, failed authentication, or secret address not in Bcc, with `reason` |
 | `dry run: lead not created` | info | `DRY_RUN` only, with the payload |
 | `AI model failed; trying next` | warning | One model errored |
 | `processing failed; will retry` | error | Mail left for the next sweep |
